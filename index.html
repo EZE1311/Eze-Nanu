@@ -2187,10 +2187,17 @@ function renderTopBar() {
 }
 
 // ========== Render: today card ==========
+// Ancla del plan: domingo 10 mayo 2026 = Semana 1.
+// Cada domingo a las 00:00 avanza a la siguiente del ciclo de 4 semanas.
+const WEEK_ANCHOR = new Date(2026, 4, 10); // mes 0-indexed: 4 = mayo
+WEEK_ANCHOR.setHours(0, 0, 0, 0);
 function autoWeek() {
-  const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-  const wk = Math.floor(((new Date() - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
-  return wk % MENU_WEEKS.length;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  if (now < WEEK_ANCHOR) return 0; // antes del arranque, mostramos Sem 1
+  const days = Math.floor((now - WEEK_ANCHOR) / 86400000);
+  const weekIndex = Math.floor(days / 7);
+  return weekIndex % MENU_WEEKS.length;
 }
 function isWeekManual() {
   return localStorage.getItem('ezeNanu_week_mode') === 'manual';
