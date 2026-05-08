@@ -1082,13 +1082,19 @@
   <section class="pane" data-pane="inicio">
 
     <div class="today-card" id="todayCard">
-      <div class="label">Hoy es</div>
-      <div class="day-name" id="todayName">—</div>
-      <div class="today-row">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-        <div><strong>Comidas</strong><span id="todayMeals">—</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+        <div>
+          <div class="label">Hoy es</div>
+          <div class="day-name" id="todayName">—</div>
+        </div>
+        <div id="todayWeekBadge" style="text-align:right; font-size:0.78rem; opacity:0.92;">
+          <div style="font-size:0.65rem; opacity:0.7; text-transform:uppercase; letter-spacing:0.06em;">Menú</div>
+          <div style="font-weight:700;" id="todayWeekLabel">—</div>
+          <button id="todayWeekModeBtn" style="display:none; background:rgba(255,255,255,0.2); border:none; color:white; font-size:0.7rem; padding:3px 8px; border-radius:6px; margin-top:4px; cursor:pointer; font-family:inherit;">Volver a auto</button>
+        </div>
       </div>
-      <div class="today-row">
+      <div id="todayMealsList" style="margin-top:14px;"></div>
+      <div class="today-row" id="todayWorkoutRow">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14.4 14.4l4.2 4.2M5.4 5.4l4.2 4.2M19.5 18l-3-3M3 4.5L6 7.5"/><path d="M19 5l-1 1M5 19l1-1M21 12h-2M5 12H3"/></svg>
         <div><strong>Ejercicio</strong><span id="todayWorkout">—</span></div>
       </div>
@@ -1609,15 +1615,15 @@ const PEOPLE = [
   { id: "nadia",  name: "Nadia",    start: 112.6, target: 90, target_final: 60 }
 ];
 
-const TODAY_PLAN = {
-  // 0=domingo .. 6=sábado
-  0: { meals: "Asado familiar al mediodía. Cena liviana.", workout: "Caminata juntos · 60 min" },
-  1: { meals: "Plan tipo lunes — pollo grillado al almuerzo, tortilla de zapallitos a la cena.", workout: "Eze: Fuerza A (tren superior). Nadia: Zumba." },
-  2: { meals: "Lentejas guisadas al almuerzo. Pollo al horno + puré de calabaza a la cena.", workout: "Eze: caminata + movilidad. Nadia: fuerza corta home office." },
-  3: { meals: "Bife magro + boniato al almuerzo. Ensalada completa a la cena.", workout: "Eze: caminata larga 60 min. Nadia: Zumba." },
-  4: { meals: "Pasta integral con bolognesa al almuerzo. Wok de vegetales con pollo a la cena.", workout: "Eze: descanso activo. Nadia: caminata corta antes de psicóloga." },
-  5: { meals: "Pollo al limón + arroz integral al almuerzo. Hamburguesa casera a la cena.", workout: "Eze: Fuerza B (tren inferior). Nadia: fuerza corta home office." },
-  6: { meals: "Cena más libre — pizza casera, sushi sin frituras o hamburguesa con ensalada.", workout: "Eze: cardio largo 60-90 min. Nadia: libre o caminata con Eze." }
+// Ejercicio por día (esto sí queda fijo por la rutina semanal)
+const DAY_WORKOUTS = {
+  0: "Caminata juntos · 60 min",
+  1: "Eze: Fuerza A (tren superior). Nadia: Zumba ✓",
+  2: "Eze: caminata + movilidad. Nadia: fuerza corta (home office).",
+  3: "Eze: caminata larga 60 min. Nadia: Zumba ✓",
+  4: "Eze: descanso activo. Nadia: caminata corta antes de psicóloga.",
+  5: "Eze: Fuerza B (tren inferior). Nadia: fuerza corta (home office).",
+  6: "Eze: cardio largo 60-90 min. Nadia: libre o caminata."
 };
 
 // ========== Recetas ==========
@@ -2181,13 +2187,73 @@ function renderTopBar() {
 }
 
 // ========== Render: today card ==========
+function autoWeek() {
+  const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+  const wk = Math.floor(((new Date() - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
+  return wk % MENU_WEEKS.length;
+}
+function isWeekManual() {
+  return localStorage.getItem('ezeNanu_week_mode') === 'manual';
+}
+function setWeekManual(week) {
+  currentWeek = week;
+  localStorage.setItem('ezeNanu_week', String(week));
+  localStorage.setItem('ezeNanu_week_mode', 'manual');
+}
+function setWeekAuto() {
+  localStorage.removeItem('ezeNanu_week');
+  localStorage.removeItem('ezeNanu_week_mode');
+  currentWeek = autoWeek();
+}
+
 function renderToday() {
   const dow = new Date().getDay();
-  const plan = TODAY_PLAN[dow];
   document.getElementById('todayName').textContent = DAY_NAMES_FULL[dow];
-  document.getElementById('todayMeals').textContent = ' ' + plan.meals;
-  document.getElementById('todayWorkout').textContent = ' ' + plan.workout;
+
+  // Banner de semana
+  document.getElementById('todayWeekLabel').textContent = `Semana ${currentWeek + 1}`;
+  const modeBtn = document.getElementById('todayWeekModeBtn');
+  if (isWeekManual()) {
+    modeBtn.style.display = 'inline-block';
+    modeBtn.textContent = `Volver a auto (sem ${autoWeek() + 1})`;
+  } else {
+    modeBtn.style.display = 'none';
+  }
+
+  // Comidas del día desde el menú real
+  const week = MENU_WEEKS[currentWeek];
+  const today = week.find(d => d.id === dow);
+  const list = document.getElementById('todayMealsList');
+  if (!today) {
+    list.innerHTML = '';
+    return;
+  }
+  const breakfast = Array.isArray(today.b) ? today.b.join(' · ') : today.b;
+  const mealRow = (icon, label, text) => `
+    <div class="today-row">
+      <div style="font-size:1.05rem; line-height:1;">${icon}</div>
+      <div><strong>${label}</strong><span style="display:block; font-size:0.85rem; line-height:1.4;">${text}</span></div>
+    </div>
+  `;
+  list.innerHTML =
+    mealRow('🥐', 'Desayuno', breakfast) +
+    mealRow('🍽️', 'Almuerzo', today.l) +
+    mealRow('☕', 'Merienda', today.m) +
+    mealRow('🌙', 'Cena', today.c);
+
+  // Ejercicio
+  document.getElementById('todayWorkout').textContent = ' ' + (DAY_WORKOUTS[dow] || '');
 }
+
+// botón "volver a auto"
+document.addEventListener('click', e => {
+  if (e.target && e.target.id === 'todayWeekModeBtn') {
+    setWeekAuto();
+    renderWeekSelector();
+    renderMenu();
+    renderToday();
+  }
+});
 
 // ========== Render: stat grid (peso actual + progreso) ==========
 function lastWeight(personId) {
@@ -2302,10 +2368,10 @@ function renderWeekSelector() {
   `).join('');
   sel.querySelectorAll('.week-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      currentWeek = parseInt(btn.dataset.week, 10);
-      localStorage.setItem('ezeNanu_week', currentWeek);
+      setWeekManual(parseInt(btn.dataset.week, 10));
       renderWeekSelector();
       renderMenu();
+      renderToday();
     });
   });
 }
@@ -2467,15 +2533,16 @@ document.querySelectorAll('.check-item').forEach(i => {
 
 // ========== Init ==========
 async function init() {
-  // recuperar semana seleccionada
-  const savedWeek = parseInt(localStorage.getItem('ezeNanu_week'), 10);
-  if (!isNaN(savedWeek) && savedWeek >= 0 && savedWeek < MENU_WEEKS.length) {
-    currentWeek = savedWeek;
+  // recuperar semana: manual (si fue elegida por el usuario) o auto
+  if (isWeekManual()) {
+    const savedWeek = parseInt(localStorage.getItem('ezeNanu_week'), 10);
+    if (!isNaN(savedWeek) && savedWeek >= 0 && savedWeek < MENU_WEEKS.length) {
+      currentWeek = savedWeek;
+    } else {
+      currentWeek = autoWeek();
+    }
   } else {
-    // por defecto: la semana correspondiente al week-of-year mod 4
-    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-    const wk = Math.floor(((new Date() - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
-    currentWeek = wk % MENU_WEEKS.length;
+    currentWeek = autoWeek();
   }
 
   renderTopBar();
