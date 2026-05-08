@@ -694,6 +694,118 @@
   .delta.up { background: #FEE2E2; color: #B91C1C; }
   .delta.same { background: var(--slate-100); color: var(--slate-700); }
 
+  /* WEEK SELECTOR */
+  .week-selector {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .week-selector::-webkit-scrollbar { display: none; }
+  .week-btn {
+    flex: 1;
+    min-width: 70px;
+    background: var(--card);
+    border: 1px solid var(--slate-200);
+    padding: 9px 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    color: var(--slate-700);
+    font-family: inherit;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .week-btn .week-label { display: block; font-size: 0.65rem; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.05em; }
+  .week-btn.active {
+    background: var(--green);
+    color: white;
+    border-color: var(--green);
+  }
+  .week-btn.active .week-label { color: rgba(255,255,255,0.85); }
+
+  /* RECIPE LINK */
+  .recipe-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: var(--orange-soft);
+    color: #C2410C;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 4px;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
+  .recipe-link:hover { background: #FED7AA; }
+  .recipe-link svg { width: 11px; height: 11px; }
+
+  /* RECIPE MODAL */
+  .recipe-modal {
+    background: white;
+    border-radius: 16px;
+    max-width: 540px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+  }
+  .recipe-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--slate-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+  }
+  .recipe-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0 0 4px;
+  }
+  .recipe-meta {
+    font-size: 0.78rem;
+    color: var(--slate-500);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .recipe-meta span { display: inline-flex; align-items: center; gap: 4px; }
+  .recipe-body { padding: 16px 20px 20px; }
+  .recipe-body h4 {
+    margin: 16px 0 8px;
+    color: var(--green-dark);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+  }
+  .recipe-body h4:first-child { margin-top: 0; }
+  .recipe-body ul, .recipe-body ol { padding-left: 20px; margin: 0 0 10px; font-size: 0.9rem; }
+  .recipe-body ul li { margin-bottom: 4px; color: var(--slate-700); }
+  .recipe-body ol li { margin-bottom: 8px; color: var(--slate-700); padding-left: 4px; }
+  .recipe-tip {
+    background: var(--blue-soft);
+    border-left: 3px solid var(--blue);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.83rem;
+    color: var(--slate-700);
+    margin-top: 12px;
+  }
+
   /* SUB-TABS */
   .subtabs {
     display: flex;
@@ -1027,7 +1139,8 @@
 
     <!-- SUB: MENU -->
     <div class="sub-content" data-sub-pane="menu">
-      <p style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 12px;">Tocá un día para ver las 4 comidas. El día actual aparece destacado.</p>
+      <p style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 8px;">4 semanas rotando. Tocá un día para ver las 4 comidas y las recetas.</p>
+      <div class="week-selector" id="weekSelector"><!-- inyectado --></div>
       <div id="menuDays"><!-- inyectado --></div>
 
       <div class="callout orange" style="margin-top: 16px;">
@@ -1417,6 +1530,20 @@
 
 </main>
 
+<!-- Modal de receta -->
+<div class="modal-backdrop" id="recipeModal">
+  <div class="recipe-modal">
+    <div class="recipe-header">
+      <div>
+        <h3 class="recipe-name" id="rcpName">—</h3>
+        <div class="recipe-meta" id="rcpMeta"></div>
+      </div>
+      <button class="modal-close" id="closeRecipe">✕</button>
+    </div>
+    <div class="recipe-body" id="rcpBody"></div>
+  </div>
+</div>
+
 <footer>
   Eze &amp; Nanu · Plan integral · Mayo 2026
 </footer>
@@ -1439,38 +1566,425 @@ const TODAY_PLAN = {
   6: { meals: "Cena más libre — pizza casera, sushi sin frituras o hamburguesa con ensalada.", workout: "Eze: cardio largo 60-90 min. Nadia: libre o caminata con Eze." }
 };
 
-const MENU = [
-  { id: 1, day: "Lunes",     b: ["<span class='who'>Eze (casa)</span>Omelet 2 huevos con tomate y queso port salut light + 1 tostada integral.", "<span class='who'>Nadia (laburo)</span>Yogur firme + 1 fruta + puñado de almendras (lo lleva en bolso)."],
-            l: "Pollo grillado al limón + ensalada (rúcula, tomate, zanahoria) + ½ taza arroz integral.",
-            m: "Yogur natural firme + 1 fruta + 5 nueces.",
-            c: "Tortilla de zapallitos al horno (3 huevos, 2 zapallitos, cebolla) + ensalada de tomate." },
-  { id: 2, day: "Martes",    b: ["<span class='who'>Eze</span>Avena 40 g cocida con leche descremada, manzana rallada, canela, 1 cda chía.", "<span class='who'>Nadia (HO)</span>Versión rápida: 1 yogur + 2 cdas avena + canela + fruta picada (3 min)."],
-            l: "Lentejas guisadas con zanahoria, cebolla y morrón (1 plato hondo) + 1 fruta.",
-            m: "1 tostada integral con queso port salut light + tomate + té sin azúcar.",
-            c: "Pollo al horno (1 pata sin piel) + puré de calabaza con un chorrito de oliva." },
-  { id: 3, day: "Miércoles", b: ["<span class='who'>Eze</span>Yogur natural + 3 cdas granola sin azúcar + ½ banana.", "<span class='who'>Nadia (laburo)</span>Tostada integral con queso untable + tomate (la lleva armada) + 1 fruta."],
-            l: "Bife magro a la plancha + ensalada (rúcula, zanahoria, cebolla morada) + boniato al horno.",
-            m: "1 fruta + 1 puñado de almendras (15-20 unidades).",
-            c: "Ensalada completa: huevo duro, zanahoria, tomate, palta, garbanzos. (Nadia puede sumar atún al natural.)" },
-  { id: 4, day: "Jueves",    b: ["<span class='who'>Eze</span>Omelet 2 huevos + 1 tostada integral + ½ palta.", "<span class='who'>Nadia (laburo)</span>Yogur + granola sin azúcar + arándanos."],
-            l: "Pasta integral (60 g en seco) con salsa casera de tomate y carne picada magra. Ensalada de tomate al lado.",
-            m: "Yogur natural + frutillas o arándanos + 5 nueces.",
-            c: "Wok de vegetales (zapallito, zanahoria, cebolla, morrón, ajo) con tofu o pollo en cubos. <strong>Sin brócoli.</strong>" },
-  { id: 5, day: "Viernes",   b: ["<span class='who'>Eze</span>Avena con leche descremada, banana, canela, 1 cda lino molido.", "<span class='who'>Nadia (HO)</span>Avena overnight prep el jueves noche (avena + yogur + chía + fruta en frasco)."],
-            l: "Pollo al limón con ajo + ½ taza arroz integral + zanahoria y zapallitos al horno.",
-            m: "Tostada integral con queso untable light + tomate y orégano.",
-            c: "Hamburguesa casera de carne magra (sin pan o medio pan integral) + ensalada de hojas + tomate." },
-  { id: 6, day: "Sábado",    weekend: true,
-            b: "Tostadas integrales con palta y huevo poché. Café. Día tranquilo, desayunan juntos en casa.",
-            l: "Comida regular: pollo o carne magra + verduras + carbo moderado.",
-            m: "Fruta + nueces, o mate cocido con tostada integral.",
-            c: "<strong>Cena más libre</strong> — UNA opción: pizza casera con masa integral, hamburguesa con ensalada (no con papas), sushi sin frituras, empanadas al horno (4-5)." },
-  { id: 0, day: "Domingo",   weekend: true,
-            b: "Yogur natural + granola sin azúcar + fruta.",
-            l: "<strong>ASADO FAMILIAR</strong> — versión balanceada: proteína magra (vacío, lomo, peceto, pollo) + ½ chorizo cada uno + ensalada de papa-huevo en porción moderada + ENSALADA VERDE GRANDE al lado (no opcional).",
-            m: "Torta saludable casera (avena, banana, huevo, canela). Si hubo postre del asado, té solo.",
-            c: "Liviana: sopa de verduras + 1 huevo revuelto, o ensalada con huevo duro." }
+// ========== Recetas ==========
+const RECIPES = {
+  'pollo-limon': {
+    name: "Pollo grillado al limón",
+    time: "30 min", serves: 2,
+    ingredients: ["2 pechugas de pollo", "1 limón (jugo + ralladura)", "2 dientes de ajo picados", "1 cda aceite de oliva", "Sal, pimienta, orégano"],
+    steps: ["Mezclar el jugo de limón, ajo, oliva, sal, pimienta y orégano en un bowl.", "Marinar el pollo en esa mezcla 15-30 min en heladera.", "Plancha bien caliente, 5-6 min cada lado hasta dorado.", "Dejar reposar 2 min antes de cortar."],
+    tip: "Si lo dejás marinar 2 hs en heladera, queda muchísimo más sabroso."
+  },
+  'pollo-horno': {
+    name: "Pollo al horno con verduras",
+    time: "50 min", serves: 4,
+    ingredients: ["4 patas de pollo (sin piel) o 2 pechugas", "1 cebolla en gajos", "2 zanahorias en bastones", "2 zapallitos en rodajas", "1 morrón en tiras", "3 dientes de ajo enteros aplastados", "2 cdas aceite de oliva", "Romero o tomillo, sal, pimienta"],
+    steps: ["Precalentar horno a 200°C.", "En una asadera, distribuir las verduras y el ajo.", "Ubicar el pollo arriba, condimentar todo con oliva, sal, pimienta y hierbas.", "Hornear 40-45 min hasta que el pollo esté dorado y los jugos salgan claros.", "Si quedan pálidos, gratinar 3 min al final."],
+    tip: "Cocinar bandejas dobles y guardar porciones para 2 días."
+  },
+  'pollo-ajillo': {
+    name: "Pollo al ajillo",
+    time: "25 min", serves: 2,
+    ingredients: ["2 pechugas de pollo cortadas en tiras", "6 dientes de ajo laminados", "1 cda aceite de oliva", "½ taza vino blanco (opcional, se evapora) o caldo casero", "Perejil picado, sal, pimienta"],
+    steps: ["Calentar el oliva a fuego medio en sartén.", "Saltear el ajo 1 min sin que se queme.", "Sumar el pollo, dorar 5 min.", "Sumar el vino o caldo, tapar y cocinar 5-7 min más.", "Terminar con perejil fresco."],
+    tip: "Acompañar con arroz integral o quinoa para absorber el jugo."
+  },
+  'pollo-mostaza': {
+    name: "Pollo a la mostaza miel light",
+    time: "30 min", serves: 2,
+    ingredients: ["2 pechugas de pollo", "2 cdas mostaza Dijon", "1 cdita stevia o sucralosa (reemplaza la miel)", "1 cda jugo de limón", "1 cdita aceite de oliva", "Sal, pimienta"],
+    steps: ["Mezclar mostaza, edulcorante, limón, oliva, sal y pimienta.", "Pintar el pollo con la mezcla por ambos lados.", "Plancha o horno 200°C unos 20 min hasta cocido.", "Pintar de nuevo con la salsa restante al servir."],
+    tip: "También va perfecto con muslos sin piel."
+  },
+  'pollo-tomate': {
+    name: "Pollo a la pizzaiola",
+    time: "35 min", serves: 2,
+    ingredients: ["2 pechugas finas o filetes de pollo", "1 lata 400 g tomate triturado sin azúcar", "1 cebolla picada chica", "2 dientes de ajo", "Orégano, albahaca, sal, pimienta", "1 cda aceite de oliva"],
+    steps: ["Saltear cebolla y ajo en oliva, 5 min.", "Sumar tomate, orégano, sal y pimienta. Cocinar 10 min.", "Sumar el pollo a la salsa, tapar, 15 min a fuego bajo.", "Terminar con albahaca fresca."],
+    tip: "Si querés más cuerpo a la salsa, sumá 1 cdita de pasta de tomate al inicio."
+  },
+  'pollo-curry': {
+    name: "Pollo al curry suave",
+    time: "30 min", serves: 2,
+    ingredients: ["2 pechugas en cubos", "1 cebolla picada", "1 zanahoria en cubos chicos", "1 cda curry en polvo", "200 ml yogur natural sin azúcar (en lugar de crema)", "1 cda aceite de oliva", "Sal, pimienta"],
+    steps: ["Saltear cebolla y zanahoria en oliva 5 min.", "Sumar el curry, tostar 30 segundos hasta que perfume.", "Sumar el pollo, dorar 5 min.", "Bajar el fuego y sumar el yogur. Cocinar 10 min sin que hierva fuerte (corta el yogur).", "Sal, pimienta y servir con arroz integral."],
+    tip: "El yogur natural es el truco para tener cremosidad sin la grasa de la crema de leche."
+  },
+  'pollo-agridulce': {
+    name: "Pollo agridulce light",
+    time: "25 min", serves: 2,
+    ingredients: ["2 pechugas en cubos", "1 morrón rojo en cubos", "1 morrón amarillo en cubos", "1 cebolla en gajos", "100 ml jugo de naranja", "2 cdas vinagre de manzana", "1 cda salsa de soja baja en sodio", "1 cdita stevia/sucralosa", "1 cdita maicena disuelta", "1 cda aceite de oliva"],
+    steps: ["Dorar el pollo en oliva, retirar.", "En la misma sartén saltear los morrones y la cebolla 4 min.", "Mezclar el jugo, vinagre, soja, edulcorante y maicena en bowl aparte.", "Sumar la mezcla a la sartén, llevar a punto.", "Volver a poner el pollo, mezclar, 3 min más."],
+    tip: "Acompañar con arroz integral o quinoa."
+  },
+  'wok': {
+    name: "Wok de vegetales con pollo",
+    time: "20 min", serves: 2,
+    ingredients: ["2 pechugas en cubos (o tofu firme)", "1 zucchini en bastones", "1 zanahoria en juliana", "1 morrón en tiras", "1 cebolla en gajos", "3 dientes de ajo picados", "1 cdita jengibre rallado", "2 cdas salsa de soja baja en sodio", "1 cda aceite de oliva", "Semillas de sésamo opcional"],
+    steps: ["Dorar el pollo en oliva en sartén/wok bien caliente, retirar.", "Saltear ajo y jengibre 30 segundos.", "Sumar las verduras de más duras a más blandas (zanahoria, morrón, zucchini, cebolla). 5 min total a fuego alto.", "Volver el pollo, sumar la soja, mezclar 1 min más.", "Servir con sésamo encima."],
+    tip: "Sin brócoli (Eze no come). Las verduras tienen que quedar firmes, no blandas."
+  },
+  'bife-cebolla': {
+    name: "Bife magro con cebolla caramelizada",
+    time: "20 min", serves: 2,
+    ingredients: ["2 bifes magros (peceto, cuadril)", "2 cebollas en plumas", "1 cda aceite de oliva", "1 cda vinagre balsámico", "1 cdita stevia", "Sal, pimienta"],
+    steps: ["En sartén con poco oliva, cocinar las cebollas a fuego bajo 15 min hasta dorarlas.", "Sumar vinagre y stevia, 2 min más. Reservar.", "Plancha bien caliente, sellar los bifes 2-3 min cada lado al punto deseado.", "Servir el bife con la cebolla encima."],
+    tip: "La cebolla cara­melizada light usa stevia en vez de azúcar — sale igual de rica."
+  },
+  'bife-chimi': {
+    name: "Bife con chimichurri",
+    time: "15 min", serves: 2,
+    ingredients: ["2 bifes magros", "Sal gruesa, pimienta", "Chimichurri: ½ taza perejil picado, 3 ajos picados, 1 cdita orégano seco, 1 cdita ají molido, 3 cdas vinagre, 4 cdas aceite de oliva, sal"],
+    steps: ["Mezclar todos los ingredientes del chimichurri, dejar 10 min juntos.", "Plancha bien caliente, sellar los bifes 2-3 min por lado.", "Servir con cucharada generosa de chimi encima."],
+    tip: "El chimichurri rinde para varias comidas — guardalo en un frasco hermético en heladera, dura 1 semana."
+  },
+  'albondigas': {
+    name: "Albóndigas en salsa",
+    time: "40 min", serves: 4,
+    ingredients: ["500 g carne picada magra", "1 huevo", "2 cdas avena (en lugar de pan rallado, mejor para hígado graso)", "1 diente de ajo rallado", "Perejil, sal, pimienta", "Salsa: 1 lata tomate triturado, 1 cebolla, 1 zanahoria rallada, orégano"],
+    steps: ["Mezclar la carne con huevo, avena, ajo, perejil, sal, pimienta. Formar bolitas chicas.", "En sartén grande, saltear cebolla y zanahoria 5 min.", "Sumar tomate, orégano, sal. Cocinar 10 min.", "Sumar las albóndigas, tapar, 20 min a fuego bajo.", "Servir con fideos integrales o arroz."],
+    tip: "Hacer porción grande y freezar las albóndigas en bolsas para tener fondo de comida."
+  },
+  'bolognesa': {
+    name: "Salsa bolognesa magra",
+    time: "30 min", serves: 4,
+    ingredients: ["400 g carne picada magra", "1 cebolla picada", "1 zanahoria rallada", "1 tallo de apio picado (opcional)", "2 dientes ajo", "1 lata 400 g tomate triturado", "Orégano, laurel, sal, pimienta", "1 cda aceite de oliva"],
+    steps: ["Saltear cebolla, zanahoria, apio y ajo en oliva 6 min.", "Sumar la carne, dorar bien, romper con cuchara, 7 min.", "Sumar el tomate, hierbas, sal, pimienta.", "Bajar el fuego, tapar, 15 min mínimo (mejor 30).", "Servir con fideos integrales (60 g por persona en seco)."],
+    tip: "La zanahoria rallada da dulzor natural — no hace falta azúcar como en algunas recetas tradicionales."
+  },
+  'hamburguesa': {
+    name: "Hamburguesa casera magra",
+    time: "20 min + descanso", serves: 4,
+    ingredients: ["500 g carne picada magra (peceto picado a cuchillo si pueden)", "1 cebolla rallada bien fina", "1 huevo", "2 cdas avena", "1 diente de ajo rallado", "1 cdita mostaza Dijon", "Sal, pimienta, orégano"],
+    steps: ["Mezclar todo en un bowl con las manos sin amasar de más.", "Formar 4 medallones, dejar reposar 10 min en heladera (queda más firme).", "Plancha bien caliente, 4 min cada lado.", "Servir sin pan o con medio pan integral, mucha verdura al lado."],
+    tip: "Formar el doble y freezar separadas con papel manteca: tenés hamburguesas listas para varias semanas."
+  },
+  'milanesas-horno': {
+    name: "Milanesas al horno",
+    time: "30 min", serves: 2,
+    ingredients: ["2 filetes de pollo finos (o nalga fileteada)", "1 huevo + 1 cda yogur", "Pan rallado integral o avena tritu­rada", "1 diente ajo rallado, perejil, sal, pimienta", "1 cda aceite de oliva en spray"],
+    steps: ["Batir huevo con yogur, ajo, perejil.", "Pasar los filetes por la mezcla, después por el pan rallado / avena triturada.", "Bandeja con papel manteca, milanesas arriba.", "Spray de oliva por arriba (es lo que les da la corteza).", "Horno 200°C, 12 min, dar vuelta y 8 min más."],
+    tip: "El truco del horno: el spray de oliva (o un chorrito) es lo que las dora. Sin eso quedan pálidas."
+  },
+  'lentejas': {
+    name: "Lentejas guisadas",
+    time: "45 min", serves: 4,
+    ingredients: ["1 taza lentejas secas (300 g)", "1 cebolla picada", "1 zanahoria en cubos", "1 morrón en cubos", "2 dientes ajo", "1 lata 400 g tomate triturado", "Comino, laurel, pimentón, sal", "1 cda aceite de oliva", "Opcional: 100 g calabaza en cubos"],
+    steps: ["Si las lentejas son chicas no hace falta remojar. Lavar bien.", "Saltear cebolla, ajo, zanahoria, morrón en oliva 6 min.", "Sumar lentejas, tomate, especias y agua que cubra (~3 tazas).", "Tapar, cocinar 30-35 min hasta que las lentejas estén tiernas.", "Sal al final."],
+    tip: "Es la mejor receta para freezar en porciones individuales. 1 plato hondo = 1 almuerzo completo."
+  },
+  'garbanzos': {
+    name: "Garbanzos guisados con verduras",
+    time: "30 min con lata", serves: 4,
+    ingredients: ["2 latas 400 g garbanzos cocidos (escurridos)", "1 cebolla picada", "1 zanahoria en cubos", "1 morrón en cubos", "1 zucchini en cubos", "1 lata tomate triturado", "1 diente ajo, comino, pimentón ahumado, sal", "1 cda aceite de oliva"],
+    steps: ["Saltear cebolla, ajo, zanahoria, morrón en oliva 6 min.", "Sumar zucchini y especias, 3 min más.", "Sumar tomate y un chorrito de agua. 8 min.", "Sumar garbanzos escurridos, mezclar, 5-7 min para integrar sabores."],
+    tip: "Receta express con lata. Si querés cocinar de cero los garbanzos, dejarlos en remojo la noche anterior y cocinar 1 hora."
+  },
+  'tortilla-zap': {
+    name: "Tortilla de zapallitos al horno",
+    time: "35 min", serves: 4,
+    ingredients: ["3 zapallitos en rodajas", "1 cebolla en plumas", "5 huevos", "2 cdas queso port salut light rallado (opcional)", "Aceite de oliva en spray", "Sal, pimienta, orégano"],
+    steps: ["Saltear cebolla en sartén con poco oliva 5 min, sumar zapallitos, 8 min hasta tiernos.", "Batir los huevos con sal, pimienta y orégano.", "Pasar las verduras a un molde antiadherente, sumar los huevos batidos.", "Horno 180°C, 20-25 min hasta dorada y firme."],
+    tip: "Versión al horno = menos aceite que la tradicional. Rinde para 4 porciones, ideal para llevar al laburo."
+  },
+  'tortilla-esp': {
+    name: "Tortilla de espinaca al horno",
+    time: "30 min", serves: 4,
+    ingredients: ["1 atado espinaca lavada", "1 cebolla picada", "5 huevos", "2 cdas queso port salut light", "Sal, pimienta, nuez moscada"],
+    steps: ["Saltear cebolla 5 min en oliva.", "Sumar espinaca y cocinar hasta que rompa hervor (2 min). Escurrir bien el agua que larga.", "Batir huevos con queso, sal, pimienta, nuez moscada.", "Mezclar todo en molde, horno 180°C 20 min."],
+    tip: "Si la espinaca queda con mucha agua, la tortilla se hace pasada — apretala bien con cuchara antes de mezclar."
+  },
+  'risotto-cal': {
+    name: "Risotto integral de calabaza",
+    time: "40 min", serves: 4,
+    ingredients: ["1 taza arroz integral (no carnaroli — adaptado para más fibra)", "300 g calabaza en cubos chicos", "1 cebolla picada chica", "2 dientes ajo", "750 ml caldo de verdura caliente (casero o cubo)", "2 cdas queso rallado tipo reggianito (opcional)", "1 cda aceite de oliva, sal, pimienta, salvia"],
+    steps: ["Saltear cebolla y ajo en oliva 5 min.", "Sumar calabaza y arroz, tostar 2 min revolviendo.", "Sumar caldo a cucharones, esperando que se absorba antes de sumar más.", "El arroz integral tarda más que el blanco — 25-30 min total.", "Cuando esté cremoso y al dente, retirar, sumar queso y salvia."],
+    tip: "El arroz integral no queda tan cremoso como el blanco, pero es mucho más nutritivo. Si pueden, el arroz Yamani es el ideal."
+  },
+  'quinoa-pollo': {
+    name: "Bowl de quinoa con pollo",
+    time: "25 min", serves: 2,
+    ingredients: ["1 taza quinoa", "2 tazas agua o caldo", "2 pechugas en cubos", "1 cebolla en plumas", "1 zucchini en cubos", "1 zanahoria rallada", "Comino, sal, pimienta, oliva", "Aderezo: 2 cdas yogur natural, 1 cdita mostaza, jugo de ½ limón"],
+    steps: ["Lavar la quinoa. Cocinar en agua/caldo, 1 parte quinoa por 2 partes líquido, 15 min hasta evaporar.", "En sartén, dorar el pollo con comino, sal, pimienta. Reservar.", "Saltear cebolla, zanahoria y zucchini 5 min.", "Armar el bowl: base quinoa, encima vegetales y pollo. Aderezo encima."],
+    tip: "Súper completo: proteína (pollo) + carbo complejo + proteína vegetal (quinoa) + vegetales."
+  },
+  'sopa-verduras': {
+    name: "Sopa de verduras",
+    time: "40 min", serves: 6,
+    ingredients: ["1 cebolla, 2 zanahorias, 1 puerro (parte blanca)", "200 g calabaza", "1 zucchini", "1 papa chica (opcional)", "1 cdita ajo en polvo o 2 dientes ajo", "Hojas de apio, perejil", "1,5 L agua o caldo", "Sal, pimienta, oliva"],
+    steps: ["Cortar todas las verduras en cubos.", "Saltear cebolla y puerro en oliva 5 min.", "Sumar el resto de verduras, 3 min más.", "Sumar agua/caldo, sal, pimienta. Hervir 25-30 min.", "Comer rústica o procesar para crema."],
+    tip: "Hacer olla grande y freezar en porciones de 250 ml. Cena rápida lista en 3 min."
+  },
+  'crema-cal': {
+    name: "Crema de calabaza con jengibre",
+    time: "35 min", serves: 4,
+    ingredients: ["500 g calabaza en cubos", "1 cebolla", "1 cdita jengibre rallado", "750 ml caldo de verdura", "1 cda aceite de oliva", "1 cda yogur natural por plato (decora)", "Sal, pimienta, nuez moscada"],
+    steps: ["Saltear cebolla y jengibre 4 min.", "Sumar la calabaza, 3 min revolviendo.", "Sumar caldo, hervir 20 min hasta tierna.", "Procesar con minipimer.", "Servir con yogur encima y semillas de calabaza."],
+    tip: "El jengibre le da carácter — no la dejen sin él. Dura 3 días en heladera, freeza bien."
+  },
+  'pure-coliflor': {
+    name: "Puré de coliflor (sin papa)",
+    time: "20 min", serves: 4,
+    ingredients: ["1 coliflor entera (~700 g)", "2 dientes ajo", "2 cdas yogur natural firme", "Sal, pimienta, nuez moscada", "Aceite de oliva al servir"],
+    steps: ["Cortar la coliflor en floretes, hervir 12 min con los ajos enteros.", "Escurrir muy bien (clave: que no quede aguada).", "Procesar con minipimer junto al ajo cocido y el yogur.", "Sal, pimienta, nuez moscada. Chorrito de oliva al servir."],
+    tip: "Reemplaza la papa con muchísimas menos calorías. Ideal para acompañar pollo o carne."
+  },
+  'boniato-horno': {
+    name: "Boniato al horno con romero",
+    time: "35 min", serves: 4,
+    ingredients: ["2 boniatos medianos en bastones", "1 cda aceite de oliva", "Ramita de romero fresco picado (o 1 cdita seco)", "Sal, pimienta, pimentón ahumado opcional"],
+    steps: ["Precalentar horno a 200°C.", "Mezclar el boniato con oliva, romero, sal, pimienta.", "Distribuir en bandeja en una sola capa (no amontonar).", "Hornear 25-30 min, dar vuelta una vez a la mitad."],
+    tip: "Sin amontonar, sino se hace al vapor en lugar de dorarse. Si tienen aire caliente / convección, mejor."
+  },
+  'verduras-grilladas': {
+    name: "Verduras grilladas mixtas",
+    time: "20 min", serves: 4,
+    ingredients: ["1 zucchini en rodajas", "1 berenjena en rodajas (con sal 10 min antes para sacarle agua)", "1 morrón rojo en tiras", "1 morrón amarillo en tiras", "1 cebolla morada en gajos", "Aceite de oliva, sal gruesa, pimienta, vinagre balsámico"],
+    steps: ["Plancha o parrilla bien caliente.", "Pintar las verduras con oliva por ambos lados.", "Grillar 3-4 min cada lado hasta marcas.", "Acomodar en plato, sal gruesa, pimienta, chorrito de balsámico."],
+    tip: "Hacer cantidad y guardar en heladera con un chorrito de oliva — duran 4 días y son un side increíble."
+  },
+  'asado-magro': {
+    name: "Asado familiar balanceado",
+    time: "1.5 h", serves: 4,
+    ingredients: ["Cortes magros: vacío, lomo, peceto, asado de tira sin grasa visible, pollo (1 kg total para 4)", "2 chorizos (medio cada uno)", "Guarnición de la semana (rota — ver menú)", "Ensalada base: tomate, cebolla, palta o zanahoria rallada"],
+    steps: ["Encender el fuego con tiempo para que esté con buena brasa, no llama.", "Sal gruesa apenas antes de poner las carnes.", "Pollo del lado de menos calor primero, después la pasta más roja.", "Servir con ensaladas frías ya listas — no entrar al asado con hambre acumulada."],
+    tip: "Llenar el plato con verdura PRIMERO, dejar la carne en porción razonable. La parrilla es proteína magra al final."
+  },
+  'avena-overnight': {
+    name: "Avena overnight (preparada la noche anterior)",
+    time: "5 min + reposo nocturno", serves: 1,
+    ingredients: ["½ taza avena tradicional (40 g)", "½ taza yogur natural firme", "½ taza leche descremada", "1 cdita chía", "Canela", "Fruta picada (banana, frutillas, manzana, arándanos)", "5 nueces o almendras"],
+    steps: ["En un frasco, mezclar avena, yogur, leche, chía, canela.", "Sumar la fruta encima.", "Tapar, heladera mínimo 6 hs (idealmente toda la noche).", "Sacás, sumás los frutos secos, comés."],
+    tip: "Hacer 2-3 frascos de una para tener desayunos resueltos. Al laburo se lleva tal cual el frasco."
+  },
+  'torta-saludable': {
+    name: "Torta saludable de banana y avena",
+    time: "40 min", serves: 8,
+    ingredients: ["3 bananas maduras pisadas", "2 huevos", "1 taza avena tradicional", "1 cda canela", "1 cdita polvo de hornear", "Opcional: nueces picadas (1 puñado), chips de chocolate >70% (2 cdas), pasas (2 cdas)"],
+    steps: ["Precalentar horno a 180°C.", "Pisar las bananas con tenedor, sumar huevos batidos.", "Sumar avena, canela, polvo de hornear. Mezclar.", "Sumar opcionales si los usan.", "Volcar en molde aceitado, 25-30 min hasta que el palillo salga limpio."],
+    tip: "Sin azúcar agregada, sin harina. Ideal para merienda o postre del finde."
+  }
+};
+
+// ========== Datos del menú: 4 semanas rotando ==========
+function bDuo(eze, nadia) {
+  return [`<span class='who'>Eze</span>${eze}`, `<span class='who'>Nadia</span>${nadia}`];
+}
+
+const MENU_WEEKS = [
+  // ===== SEMANA 1 — base =====
+  [
+    { id: 1, day: "Lunes",
+      b: bDuo("Omelet de 2 huevos con tomate y queso port salut light + 1 tostada integral.", "Yogur firme + 1 fruta + puñado de almendras (lleva al laburo)."),
+      l: "Pollo grillado al limón + ½ taza arroz integral + Eze: ensalada (rúcula, tomate, zanahoria) / Nadia: zucchini al horno + tomate cubeteado.",
+      l_recipe: "pollo-limon",
+      m: "Yogur natural firme + 1 fruta + 5 nueces.",
+      c: "Tortilla de zapallitos al horno + tomate en cubos.",
+      c_recipe: "tortilla-zap" },
+    { id: 2, day: "Martes",
+      b: bDuo("Avena 40 g cocida con leche descremada, manzana rallada, canela, 1 cda chía.", "Versión rápida home office: 1 yogur + 2 cdas avena + canela + fruta picada (3 min)."),
+      l: "Lentejas guisadas con zanahoria, cebolla y morrón (1 plato hondo) + 1 fruta.",
+      l_recipe: "lentejas",
+      m: "1 tostada integral con queso port salut light + tomate + té.",
+      c: "Pollo al horno (1 pata sin piel) + puré de calabaza con un chorrito de oliva.",
+      c_recipe: "pollo-horno" },
+    { id: 3, day: "Miércoles",
+      b: bDuo("Yogur natural + 3 cdas granola sin azúcar + ½ banana.", "Tostada integral con queso untable + tomate (la lleva armada) + 1 fruta."),
+      l: "Bife magro a la plancha + boniato al horno + Eze: ensalada (rúcula, zanahoria) / Nadia: zanahoria rallada + tomate + cebolla.",
+      l_recipe: "boniato-horno",
+      m: "1 fruta + puñado de almendras (15-20).",
+      c: "Bowl con huevo duro, zanahoria, tomate, palta, garbanzos. Nadia puede sumar atún al natural." },
+    { id: 4, day: "Jueves",
+      b: bDuo("Omelet de 2 huevos + 1 tostada integral + ½ palta.", "Yogur + granola sin azúcar + arándanos."),
+      l: "Pasta integral (60 g en seco) con bolognesa magra + tomate cubeteado al lado.",
+      l_recipe: "bolognesa",
+      m: "Yogur natural + frutillas o arándanos + 5 nueces.",
+      c: "Wok de vegetales con pollo o tofu (sin brócoli).",
+      c_recipe: "wok" },
+    { id: 5, day: "Viernes",
+      b: bDuo("Avena con leche descremada, banana, canela, 1 cda lino molido.", "Avena overnight (preparada el jueves a la noche)."),
+      l: "Pollo al limón con ajo + ½ taza arroz integral + zanahoria y zapallitos al horno.",
+      l_recipe: "pollo-limon",
+      m: "Tostada integral con queso untable light + tomate y orégano.",
+      c: "Hamburguesa casera magra (sin pan o con medio pan integral) + Eze: ensalada de hojas + tomate / Nadia: tomate + cebolla + pepino.",
+      c_recipe: "hamburguesa" },
+    { id: 6, day: "Sábado", weekend: true,
+      b: "Tostadas integrales con palta y huevo poché. Café. Día tranquilo, juntos en casa.",
+      l: "Pollo a la pizzaiola + arroz integral + tomate y cebolla.",
+      l_recipe: "pollo-tomate",
+      m: "Fruta + nueces, o mate cocido con tostada integral.",
+      c: "<strong>Cena más libre</strong> — UNA opción: pizza casera con masa integral, hamburguesa con ensalada, sushi sin frituras, empanadas al horno (4-5)." },
+    { id: 0, day: "Domingo", weekend: true,
+      b: "Yogur natural + granola sin azúcar + fruta.",
+      l: "<strong>ASADO FAMILIAR</strong> — proteína magra (vacío, lomo, peceto, pollo) + ½ chorizo cada uno + <strong>guarnición sem 1: ensalada de papa-huevo (porción moderada)</strong> + tomate y cebolla.",
+      l_recipe: "asado-magro",
+      m: "Torta saludable casera. Si hubo postre del asado, té solo.",
+      c_recipe: "torta-saludable",
+      c: "Liviana: sopa de verduras + 1 huevo revuelto.",
+      c2_recipe: "sopa-verduras" }
+  ],
+
+  // ===== SEMANA 2 — variedad de proteínas =====
+  [
+    { id: 1, day: "Lunes",
+      b: bDuo("Omelet con champignones y queso untable light + 1 tostada integral.", "Yogur firme + manzana picada + 5 nueces (al laburo)."),
+      l: "Pollo al curry suave + ½ taza arroz integral + zanahoria al horno.",
+      l_recipe: "pollo-curry",
+      m: "1 fruta + puñado de almendras.",
+      c: "Tortilla de espinaca al horno + tomate cubeteado.",
+      c_recipe: "tortilla-esp" },
+    { id: 2, day: "Martes",
+      b: bDuo("Yogur natural + chía + frutos secos + 1 fruta.", "Avena overnight prep el lunes (avena + yogur + arándanos)."),
+      l: "Garbanzos guisados con verduras (1 plato hondo) + 1 fruta.",
+      l_recipe: "garbanzos",
+      m: "Tostada integral + queso untable + orégano.",
+      c: "Pollo al ajillo + zucchini grillado.",
+      c_recipe: "pollo-ajillo" },
+    { id: 3, day: "Miércoles",
+      b: bDuo("Tostadas integrales con palta y huevo duro picado.", "Tostada integral con queso untable + tomate (lo lleva al laburo) + fruta."),
+      l: "Albóndigas en salsa con fideos integrales (60 g en seco) + tomate al lado.",
+      l_recipe: "albondigas",
+      m: "Yogur + 5 nueces.",
+      c: "Crema de calabaza con jengibre + 1 huevo duro.",
+      c_recipe: "crema-cal" },
+    { id: 4, day: "Jueves",
+      b: bDuo("Avena cocida con manzana y canela.", "Yogur + granola + frutilla."),
+      l: "Bife con cebolla caramelizada + boniato al horno + tomate.",
+      l_recipe: "bife-cebolla",
+      m: "1 fruta + puñado de almendras.",
+      c: "Verduras grilladas + 2 huevos revueltos.",
+      c_recipe: "verduras-grilladas" },
+    { id: 5, day: "Viernes",
+      b: bDuo("Omelet con tomate + 1 tostada integral + ½ palta.", "Yogur firme + 1 fruta + 5 nueces."),
+      l: "Bowl de quinoa con pollo y vegetales.",
+      l_recipe: "quinoa-pollo",
+      m: "Tostada integral con queso port salut + tomate.",
+      c: "Hamburguesa casera + verduras grilladas (sin pan o medio pan integral).",
+      c_recipe: "hamburguesa" },
+    { id: 6, day: "Sábado", weekend: true,
+      b: "Tostadas integrales con palta y huevo poché.",
+      l: "Pollo a la mostaza miel light + zanahoria y zapallitos al horno.",
+      l_recipe: "pollo-mostaza",
+      m: "Fruta + nueces.",
+      c: "<strong>Cena más libre</strong> — pizza casera, hamburguesa con ensalada, sushi sin frituras, empanadas al horno." },
+    { id: 0, day: "Domingo", weekend: true,
+      b: "Yogur con granola y arándanos.",
+      l: "<strong>ASADO FAMILIAR</strong> — cortes magros + ½ chorizo + <strong>guarnición sem 2: chauchas con tomate y cebolla morada al vapor + un poco de papa hervida (en menos cantidad)</strong>.",
+      l_recipe: "asado-magro",
+      m: "Fruta o porción de torta saludable.",
+      c_recipe: "torta-saludable",
+      c: "Liviana: crema de zanahoria + huevo duro." }
+  ],
+
+  // ===== SEMANA 3 — mediterránea =====
+  [
+    { id: 1, day: "Lunes",
+      b: bDuo("Omelet con tomate y orégano + 1 tostada integral.", "Yogur firme + frutos secos + 1 fruta."),
+      l: "Milanesas al horno (pollo) + puré de coliflor + tomate.",
+      l_recipe: "milanesas-horno",
+      m: "Yogur + 5 nueces.",
+      c: "Pollo a la pizzaiola con cebolla.",
+      c_recipe: "pollo-tomate" },
+    { id: 2, day: "Martes",
+      b: bDuo("Avena con manzana, canela y chía.", "Yogur + 2 cdas avena + arándanos (rápido)."),
+      l: "Lentejas guisadas (variante con calabaza) + 1 fruta.",
+      l_recipe: "lentejas",
+      m: "Tostada integral con queso untable + orégano.",
+      c: "Risotto integral de calabaza + 1 huevo duro al lado.",
+      c_recipe: "risotto-cal" },
+    { id: 3, day: "Miércoles",
+      b: bDuo("Yogur + granola sin azúcar + ½ banana.", "Tostada con queso untable + tomate + 1 fruta."),
+      l: "Bife con chimichurri + boniato al horno.",
+      l_recipe: "bife-chimi",
+      m: "Fruta + almendras.",
+      c: "Tortilla de espinaca + tomate.",
+      c_recipe: "tortilla-esp" },
+    { id: 4, day: "Jueves",
+      b: bDuo("Omelet con palta + tostada integral.", "Yogur + granola + frutilla."),
+      l: "Pasta integral con pollo a la pizzaiola.",
+      l_recipe: "pollo-tomate",
+      m: "Yogur con frutillas + nueces.",
+      c: "Sopa de verduras espesa + 2 huevos revueltos.",
+      c_recipe: "sopa-verduras" },
+    { id: 5, day: "Viernes",
+      b: bDuo("Avena cocida con banana y lino.", "Avena overnight prep el jueves."),
+      l: "Albóndigas en salsa + arroz integral.",
+      l_recipe: "albondigas",
+      m: "Tostada con queso port salut + tomate.",
+      c: "Wok de vegetales con pollo o tofu.",
+      c_recipe: "wok" },
+    { id: 6, day: "Sábado", weekend: true,
+      b: "Tostadas integrales con palta y huevo poché.",
+      l: "Pollo al ajillo + verduras grilladas.",
+      l_recipe: "pollo-ajillo",
+      m: "Fruta + nueces.",
+      c: "<strong>Cena más libre</strong> — comida especial." },
+    { id: 0, day: "Domingo", weekend: true,
+      b: "Yogur natural + granola + fruta.",
+      l: "<strong>ASADO FAMILIAR</strong> — cortes magros + ½ chorizo + <strong>guarnición sem 3: boniato al horno con romero + tomate y cebolla</strong>.",
+      l_recipe: "boniato-horno",
+      m: "Torta saludable.",
+      c_recipe: "torta-saludable",
+      c: "Liviana: crema de calabaza + huevo duro.",
+      c2_recipe: "crema-cal" }
+  ],
+
+  // ===== SEMANA 4 — más internacional =====
+  [
+    { id: 1, day: "Lunes",
+      b: bDuo("Omelet con cebolla y queso untable + 1 tostada integral.", "Yogur firme + 1 fruta + almendras (al laburo)."),
+      l: "Pollo agridulce light + arroz integral + morrón.",
+      l_recipe: "pollo-agridulce",
+      m: "1 fruta + 5 nueces.",
+      c: "Tortilla de zapallitos + tomate cubeteado.",
+      c_recipe: "tortilla-zap" },
+    { id: 2, day: "Martes",
+      b: bDuo("Yogur + chía + arándanos + 1 fruta.", "Avena overnight (banana + canela)."),
+      l: "Garbanzos guisados (variante con espinaca) + 1 fruta.",
+      l_recipe: "garbanzos",
+      m: "Tostada con queso untable + tomate.",
+      c: "Pollo al curry suave + arroz integral.",
+      c_recipe: "pollo-curry" },
+    { id: 3, day: "Miércoles",
+      b: bDuo("Tostada con palta y huevo duro picado.", "Yogur + granola + ½ banana."),
+      l: "Milanesas al horno (carne) + puré de coliflor + zanahoria asada.",
+      l_recipe: "pure-coliflor",
+      m: "Fruta + almendras.",
+      c: "Bowl de quinoa con pollo (versión con cúrcuma).",
+      c_recipe: "quinoa-pollo" },
+    { id: 4, day: "Jueves",
+      b: bDuo("Omelet con palta + tostada integral.", "Tostada con queso untable + tomate + fruta."),
+      l: "Bolognesa magra con fideos integrales + tomate al lado.",
+      l_recipe: "bolognesa",
+      m: "Yogur + frutilla + 5 nueces.",
+      c: "Verduras grilladas + 2 huevos.",
+      c_recipe: "verduras-grilladas" },
+    { id: 5, day: "Viernes",
+      b: bDuo("Avena con manzana, canela, lino.", "Avena overnight."),
+      l: "Pollo a la mostaza miel + boniato al horno.",
+      l_recipe: "pollo-mostaza",
+      m: "Tostada con queso port salut + orégano.",
+      c: "Hamburguesa casera + verduras grilladas.",
+      c_recipe: "hamburguesa" },
+    { id: 6, day: "Sábado", weekend: true,
+      b: "Tostadas integrales con palta y huevo poché.",
+      l: "Wok con pollo y muchas verduras + arroz integral.",
+      l_recipe: "wok",
+      m: "Fruta + nueces.",
+      c: "<strong>Cena más libre</strong> — comida especial." },
+    { id: 0, day: "Domingo", weekend: true,
+      b: "Yogur con granola y fruta.",
+      l: "<strong>ASADO FAMILIAR</strong> — cortes magros + ½ chorizo + <strong>guarnición sem 4: verduras grilladas (zucchini, berenjena, morrón, cebolla) + tomate y palta</strong>.",
+      l_recipe: "verduras-grilladas",
+      m: "Torta saludable.",
+      c_recipe: "torta-saludable",
+      c: "Liviana: sopa de verduras + huevo revuelto.",
+      c2_recipe: "sopa-verduras" }
+  ]
 ];
+
+// Estado actual de la semana mostrada
+let currentWeek = 0; // 0 = sem 1
 
 const DAY_NAMES_FULL = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
 
@@ -1720,12 +2234,37 @@ document.getElementById('saveWeight').addEventListener('click', async () => {
   }
 });
 
-// ========== Render: menú ==========
+// ========== Render: selector de semana ==========
+function renderWeekSelector() {
+  const sel = document.getElementById('weekSelector');
+  if (!sel) return;
+  sel.innerHTML = MENU_WEEKS.map((_, i) => `
+    <button class="week-btn ${i === currentWeek ? 'active' : ''}" data-week="${i}">
+      <span class="week-label">Semana</span>
+      ${i + 1}
+    </button>
+  `).join('');
+  sel.querySelectorAll('.week-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentWeek = parseInt(btn.dataset.week, 10);
+      localStorage.setItem('ezeNanu_week', currentWeek);
+      renderWeekSelector();
+      renderMenu();
+    });
+  });
+}
+
+// ========== Render: menú (con recetas) ==========
+function recipeButton(id) {
+  if (!id || !RECIPES[id]) return '';
+  return `<button class="recipe-link" data-recipe="${id}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 2H8c-1.1 0-2 .9-2 2v3H4v2h2v3H4v2h2v3H4v2h2v3c0 1.1.9 2 2 2h11c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3z"/></svg>Ver receta</button>`;
+}
 function renderMenu() {
   const wrap = document.getElementById('menuDays');
+  if (!wrap) return;
   const todayDow = new Date().getDay();
-  // ordeno: hoy primero, luego mañana, etc
-  const ordered = MENU.slice().sort((a, b) => {
+  const week = MENU_WEEKS[currentWeek];
+  const ordered = week.slice().sort((a, b) => {
     const da = (a.id - todayDow + 7) % 7;
     const db = (b.id - todayDow + 7) % 7;
     return da - db;
@@ -1744,10 +2283,10 @@ function renderMenu() {
           <svg class="day-toggle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </div>
         <div class="day-body">
-          <div class="meal"><div class="meal-label">Desayuno</div><div class="meal-content">${breakfast}</div></div>
-          <div class="meal"><div class="meal-label">Almuerzo</div><div class="meal-content">${d.l}</div></div>
-          <div class="meal"><div class="meal-label">Merienda</div><div class="meal-content">${d.m}</div></div>
-          <div class="meal"><div class="meal-label">Cena</div><div class="meal-content">${d.c}</div></div>
+          <div class="meal"><div class="meal-label">Desayuno</div><div class="meal-content">${breakfast}${recipeButton(d.b_recipe)}</div></div>
+          <div class="meal"><div class="meal-label">Almuerzo</div><div class="meal-content">${d.l}<div>${recipeButton(d.l_recipe)}</div></div></div>
+          <div class="meal"><div class="meal-label">Merienda</div><div class="meal-content">${d.m}${recipeButton(d.m_recipe)}</div></div>
+          <div class="meal"><div class="meal-label">Cena</div><div class="meal-content">${d.c}<div>${recipeButton(d.c_recipe)}${recipeButton(d.c2_recipe)}</div></div></div>
         </div>
       </div>
     `;
@@ -1756,7 +2295,40 @@ function renderMenu() {
   wrap.querySelectorAll('[data-day-toggle]').forEach(h => {
     h.addEventListener('click', () => h.parentElement.classList.toggle('open'));
   });
+  // recipe buttons
+  wrap.querySelectorAll('[data-recipe]').forEach(b => {
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      openRecipe(b.dataset.recipe);
+    });
+  });
 }
+
+// ========== Modal de receta ==========
+function openRecipe(id) {
+  const r = RECIPES[id];
+  if (!r) return;
+  document.getElementById('rcpName').textContent = r.name;
+  document.getElementById('rcpMeta').innerHTML = `
+    <span>⏱ ${r.time}</span>
+    <span>🍽 ${r.serves} ${r.serves === 1 ? 'porción' : 'porciones'}</span>
+  `;
+  const body = document.getElementById('rcpBody');
+  body.innerHTML = `
+    <h4>Ingredientes</h4>
+    <ul>${r.ingredients.map(i => `<li>${i}</li>`).join('')}</ul>
+    <h4>Preparación</h4>
+    <ol>${r.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+    ${r.tip ? `<div class="recipe-tip">💡 <strong>Tip:</strong> ${r.tip}</div>` : ''}
+  `;
+  document.getElementById('recipeModal').classList.add('open');
+}
+document.getElementById('closeRecipe').addEventListener('click', () => {
+  document.getElementById('recipeModal').classList.remove('open');
+});
+document.getElementById('recipeModal').addEventListener('click', e => {
+  if (e.target.id === 'recipeModal') e.target.classList.remove('open');
+});
 
 // ========== Render: goals (Objetivos pane) ==========
 function renderGoals() {
@@ -1817,10 +2389,22 @@ document.querySelectorAll('.check-item').forEach(i => {
 
 // ========== Init ==========
 async function init() {
+  // recuperar semana seleccionada
+  const savedWeek = parseInt(localStorage.getItem('ezeNanu_week'), 10);
+  if (!isNaN(savedWeek) && savedWeek >= 0 && savedWeek < MENU_WEEKS.length) {
+    currentWeek = savedWeek;
+  } else {
+    // por defecto: la semana correspondiente al week-of-year mod 4
+    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+    const wk = Math.floor(((new Date() - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
+    currentWeek = wk % MENU_WEEKS.length;
+  }
+
   renderTopBar();
   renderToday();
   renderStats();
   renderHistory();
+  renderWeekSelector();
   renderMenu();
   renderGoals();
   // tab inicial: del hash o 'inicio'
