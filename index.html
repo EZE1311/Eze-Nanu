@@ -1238,45 +1238,27 @@
 
     <!-- SUB: COMPRAS -->
     <div class="sub-content" data-sub-pane="compras" style="display:none;">
-      <p style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 12px;">Lista para los dos por una semana. Tocá los items que ya tenés.</p>
+      <p style="font-size: 0.85rem; color: var(--slate-500); margin-bottom: 8px;">Lista de compras adaptada a cada semana del menú. Tocá los items que ya tenés.</p>
+      <div class="week-selector" id="comprasWeekSel"></div>
 
       <div class="card">
         <div class="card-header"><div class="card-title">🥩 Proteínas</div></div>
-        <ul class="check-list">
-          <li class="check-item"><div class="check-box"></div>Pollo: 2 kg (pechugas y patas)</li>
-          <li class="check-item"><div class="check-box"></div>Carne magra (peceto/cuadril/nalga): 1 kg</li>
-          <li class="check-item"><div class="check-box"></div>Carne picada magra: 500 g</li>
-          <li class="check-item"><div class="check-box"></div>Huevos: 2 docenas</li>
-          <li class="check-item"><div class="check-box"></div>Atún al natural: 3 latas (Nadia)</li>
-          <li class="check-item"><div class="check-box"></div>Queso port salut light: 200 g</li>
-          <li class="check-item"><div class="check-box"></div>Queso untable light: 1 pote</li>
-          <li class="check-item"><div class="check-box"></div>Tofu: 300 g (opcional, wok)</li>
-          <li class="check-item"><div class="check-box"></div>Yogur natural firme sin azúcar: 1 kg</li>
-        </ul>
+        <ul class="check-list" id="comprasProteinas"></ul>
       </div>
 
       <div class="card">
-        <div class="card-header"><div class="card-title">🥬 Verduras y frutas</div></div>
-        <ul class="check-list">
-          <li class="check-item"><div class="check-box"></div>Rúcula 2 atados, espinaca 1 atado</li>
-          <li class="check-item"><div class="check-box"></div>Tomate (1 kg), zanahoria (1 kg)</li>
-          <li class="check-item"><div class="check-box"></div>Cebolla (1 kg), zapallitos (1 kg)</li>
-          <li class="check-item"><div class="check-box"></div>Calabaza, boniato (1 kg), papa (1 kg)</li>
-          <li class="check-item"><div class="check-box"></div>Ajo, palta (3), morrones (3)</li>
-          <li class="check-item"><div class="check-box"></div>Frutas variadas: manzana, banana, frutilla/arándanos, pera, kiwi (~3 kg)</li>
-        </ul>
+        <div class="card-header"><div class="card-title">🥬 Verduras</div></div>
+        <ul class="check-list" id="comprasVerduras"></ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">🍎 Frutas</div></div>
+        <ul class="check-list" id="comprasFrutas"></ul>
       </div>
 
       <div class="card">
         <div class="card-header"><div class="card-title">🌾 Almacén</div></div>
-        <ul class="check-list">
-          <li class="check-item"><div class="check-box"></div>Arroz integral, avena tradicional</li>
-          <li class="check-item"><div class="check-box"></div>Fideos integrales, lentejas, garbanzos</li>
-          <li class="check-item"><div class="check-box"></div>Pan integral o lactal integral</li>
-          <li class="check-item"><div class="check-box"></div>Aceite de oliva, salsa de tomate sin azúcar</li>
-          <li class="check-item"><div class="check-box"></div>Chía, lino, nueces, almendras</li>
-          <li class="check-item"><div class="check-box"></div>Canela, orégano, pimentón</li>
-        </ul>
+        <ul class="check-list" id="comprasAlmacen"></ul>
       </div>
 
       <div class="callout red">
@@ -2158,6 +2140,228 @@ const MENU_WEEKS = [
 // Estado actual de la semana mostrada
 let currentWeek = 0; // 0 = sem 1
 
+// ========== Compras por semana ==========
+const SHOPPING_WEEKS = [
+  // SEM 1 — base
+  {
+    proteinas: [
+      "Pollo: 2 kg (pechugas + 1 pata)",
+      "Carne magra (peceto, cuadril): 700 g (bife mié + bowl mié)",
+      "Carne picada magra: 500 g (bolognesa jue + hamburguesas vie)",
+      "Huevos: 2 docenas",
+      "Atún al natural: 2 latas (Nadia mié)",
+      "Queso port salut light: 200 g",
+      "Queso untable light: 1 pote",
+      "Tofu firme: 300 g (opcional, wok jue)",
+      "Yogur natural firme sin azúcar: 1,5 kg"
+    ],
+    verduras: [
+      "Rúcula: 2 atados (Eze)",
+      "Tomate: 1,5 kg",
+      "Zanahoria: 1 kg",
+      "Cebolla: 1 kg",
+      "Cebolla morada: 1",
+      "Zapallitos: 800 g",
+      "Calabaza: 1 mediana",
+      "Boniato: 800 g",
+      "Papa: ½ kg (sólo asado domingo)",
+      "Morrones: 2",
+      "Ajo: 1 cabeza",
+      "Palta: 3"
+    ],
+    frutas: [
+      "Banana: 6",
+      "Manzana: 4",
+      "Frutilla o arándanos: 1 caja",
+      "Pera: 3",
+      "Kiwi: 4",
+      "Limones: 3 (pollo al limón lun + vie)"
+    ],
+    almacen: [
+      "Arroz integral: 500 g",
+      "Fideos integrales: 500 g",
+      "Lentejas secas: 300 g",
+      "Garbanzos: 1 lata (bowl mié)",
+      "Pan integral o lactal integral",
+      "Aceite de oliva extra virgen",
+      "Salsa de tomate sin azúcar agregada: 1 lata",
+      "Avena tradicional (para hamburguesas + bolognesa)",
+      "Granola sin azúcar: 1 paquete",
+      "Chía, lino, nueces, almendras",
+      "Canela, orégano, pimentón, ají molido"
+    ]
+  },
+  // SEM 2 — variedad de proteínas
+  {
+    proteinas: [
+      "Pollo: 2,5 kg (pechugas, patas, cubos para curry)",
+      "Carne magra: 1 kg (bife jue)",
+      "Carne picada magra: 800 g (albóndigas mié + hamburguesas vie)",
+      "Huevos: 2 docenas",
+      "Champignones: 200 g (omelet Eze lun)",
+      "Queso port salut light: 200 g",
+      "Queso untable light: 1 pote",
+      "Yogur natural firme: 1,5 kg"
+    ],
+    verduras: [
+      "Espinaca: 2 atados (tortilla lun + wok)",
+      "Tomate: 1 kg",
+      "Zanahoria: 1 kg",
+      "Cebolla: 1 kg",
+      "Cebolla morada: 2",
+      "Zapallitos: 800 g",
+      "Zucchini: 2",
+      "Calabaza: 1 grande (crema mié + curry)",
+      "Berenjena: 1 (verduras grilladas jue)",
+      "Morrón rojo: 1, amarillo: 1",
+      "Boniato: 1 kg",
+      "Papa: ½ kg (asado domingo, poca)",
+      "Chauchas: ½ kg (asado domingo)",
+      "Ajo: 1 cabeza",
+      "Palta: 3",
+      "Jengibre fresco: trozo chico (crema)"
+    ],
+    frutas: [
+      "Manzana: 4",
+      "Banana: 6",
+      "Arándanos: 1 caja",
+      "Frutilla: 1 caja",
+      "Pera: 3",
+      "Kiwi: 4",
+      "Limón: 2"
+    ],
+    almacen: [
+      "Quinoa: 250 g",
+      "Arroz integral: 500 g",
+      "Garbanzos: 2 latas",
+      "Pan integral",
+      "Lata tomate triturado x 2",
+      "Curry en polvo, comino",
+      "Pimentón ahumado",
+      "Vinagre de manzana",
+      "Salsa de soja baja en sodio",
+      "Stevia o sucralosa",
+      "Maicena (pollo agridulce)",
+      "Avena tradicional",
+      "Granola sin azúcar",
+      "Aceite de oliva, sésamo",
+      "Chía, lino, nueces, almendras"
+    ]
+  },
+  // SEM 3 — mediterránea
+  {
+    proteinas: [
+      "Pollo: 2 kg (pechugas + supremas)",
+      "Filetes finos pollo o nalga fileteada: 400 g (milanesas lun)",
+      "Carne magra: 800 g (bife mié)",
+      "Carne picada magra: 800 g (albóndigas vie + bolognesa con pollo)",
+      "Huevos: 2 docenas",
+      "Queso reggianito o parmesano rallado: 100 g (risotto)",
+      "Queso port salut light: 200 g",
+      "Queso untable light: 1 pote",
+      "Yogur natural firme: 1 kg"
+    ],
+    verduras: [
+      "Espinaca: 1 atado (tortilla mié)",
+      "Tomate: 1,5 kg (varias salsas)",
+      "Zanahoria: 1 kg",
+      "Cebolla: 1 kg",
+      "Cebolla morada: 1",
+      "Zapallitos: 1 kg",
+      "Zucchini: 2",
+      "Calabaza: 2 medianas (risotto + lentejas)",
+      "Boniato: 1 kg (varios usos esta semana)",
+      "Coliflor: 1 entera (puré reemplazo de papa)",
+      "Morrones: 2",
+      "Ajo: 1 cabeza",
+      "Palta: 2",
+      "Perejil fresco: 1 atado (chimichurri)"
+    ],
+    frutas: [
+      "Banana: 5",
+      "Manzana: 3",
+      "Frutilla: 1 caja",
+      "Arándanos: 1 caja",
+      "Pera: 3",
+      "Kiwi: 3",
+      "Limones: 3"
+    ],
+    almacen: [
+      "Arroz integral: 500 g (incluye Yamani para risotto si consiguen)",
+      "Fideos integrales: 500 g",
+      "Lentejas: 300 g",
+      "Pan rallado integral o avena triturada (milanesas)",
+      "Aceite de oliva extra virgen",
+      "Lata tomate triturado x 3",
+      "Vinagre",
+      "Caldo de verdura (cubitos o casero)",
+      "Salvia (fresco o seco)",
+      "Romero (asado domingo + boniato)",
+      "Ají molido, orégano",
+      "Avena tradicional",
+      "Granola sin azúcar",
+      "Chía, lino, nueces, almendras"
+    ]
+  },
+  // SEM 4 — internacional / asiática
+  {
+    proteinas: [
+      "Pollo: 2,5 kg (pechugas, patas, cubos)",
+      "Filetes finos para milanesas: 400 g (mié)",
+      "Carne magra: 700 g",
+      "Carne picada magra: 500 g (bolognesa jue + hamburguesas vie)",
+      "Tofu firme: 300 g (wok sáb)",
+      "Huevos: 2 docenas",
+      "Queso port salut light: 200 g",
+      "Queso untable light: 1 pote",
+      "Yogur natural firme: 1 kg"
+    ],
+    verduras: [
+      "Espinaca: 2 atados (garbanzos mar + opciones)",
+      "Tomate: 1 kg",
+      "Cebolla: 1 kg",
+      "Cebolla morada: 1",
+      "Zucchini: 2 (wok)",
+      "Zapallitos: 600 g (cena lun Nadia tortilla)",
+      "Berenjena: 2 (verduras grilladas finde)",
+      "Morrón rojo: 2, amarillo: 2 (agridulce + grilladas)",
+      "Coliflor: 1 (puré)",
+      "Calabaza: 1",
+      "Zanahoria: 1 kg",
+      "Boniato: ½ kg",
+      "Ajo: 1 cabeza",
+      "Palta: 2",
+      "Jengibre fresco: trozo (wok)"
+    ],
+    frutas: [
+      "Naranjas: 2 (pollo agridulce)",
+      "Banana: 5",
+      "Manzana: 3",
+      "Arándanos: 1 caja",
+      "Pera: 3",
+      "Limón: 2"
+    ],
+    almacen: [
+      "Quinoa: 250 g",
+      "Arroz integral: 500 g",
+      "Fideos integrales: 500 g",
+      "Garbanzos: 2 latas",
+      "Pan integral",
+      "Lata tomate triturado x 2",
+      "Salsa de soja baja en sodio",
+      "Vinagre de manzana",
+      "Curry, comino, cúrcuma",
+      "Maicena (espesar agridulce)",
+      "Stevia o sucralosa",
+      "Mostaza Dijon",
+      "Aceite de oliva, sésamo en semillas",
+      "Avena tradicional (Nadia desayunos)",
+      "Granola sin azúcar",
+      "Chía, lino, nueces, almendras"
+    ]
+  }
+];
+
 const DAY_NAMES_FULL = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
 
 // ========== Sync con Gist ==========
@@ -2474,6 +2678,7 @@ document.addEventListener('click', e => {
     setWeekAuto();
     renderWeekSelector();
     renderMenu();
+    renderCompras();
   }
 });
 
@@ -2684,12 +2889,10 @@ document.getElementById('deleteWeightBtn').addEventListener('click', async () =>
   if (getToken()) await pushGist();
 });
 
-// ========== Render: selector de semana ==========
+// ========== Render: selector(es) de semana ==========
 function renderWeekSelector() {
-  const sel = document.getElementById('weekSelector');
-  if (!sel) return;
   const auto = autoWeek();
-  let html = MENU_WEEKS.map((_, i) => {
+  const html = MENU_WEEKS.map((_, i) => {
     const isActive = i === currentWeek;
     const isAuto = i === auto;
     return `
@@ -2699,32 +2902,58 @@ function renderWeekSelector() {
       </button>
     `;
   }).join('');
-  sel.innerHTML = html;
 
-  // Aviso "estás viendo manual" + botón volver a auto, debajo
-  const noteId = 'weekModeNote';
-  let note = document.getElementById(noteId);
-  if (!note) {
-    note = document.createElement('div');
-    note.id = noteId;
-    note.style.cssText = 'display:flex; align-items:center; gap:8px; font-size:0.78rem; color:var(--slate-500); margin-bottom:10px; padding:8px 12px; background:var(--blue-soft); border-radius:8px;';
-    sel.parentNode.insertBefore(note, sel.nextSibling);
-  }
-  if (isWeekManual()) {
-    note.style.display = 'flex';
-    note.innerHTML = `<span style="flex:1">Estás viendo Semana ${currentWeek + 1} fija. La semana de hoy según calendario es la ${auto + 1}.</span>
-      <button id="backToAutoBtn" style="background:var(--blue); color:white; border:none; padding:6px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer; font-family:inherit; flex-shrink:0;">Volver a auto</button>`;
-  } else {
-    note.style.display = 'none';
-  }
-
-  sel.querySelectorAll('.week-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      setWeekManual(parseInt(btn.dataset.week, 10));
-      renderWeekSelector();
-      renderMenu();
+  // Renderizar en todos los contenedores que sean selectores de semana (menú + compras)
+  const containers = [document.getElementById('weekSelector'), document.getElementById('comprasWeekSel')].filter(Boolean);
+  containers.forEach(sel => {
+    sel.innerHTML = html;
+    sel.querySelectorAll('.week-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setWeekManual(parseInt(btn.dataset.week, 10));
+        renderWeekSelector();
+        renderMenu();
+        renderCompras();
+      });
     });
   });
+
+  // Aviso "estás viendo manual" SOLO en el del menú (uno solo)
+  const menuSel = document.getElementById('weekSelector');
+  if (menuSel) {
+    const noteId = 'weekModeNote';
+    let note = document.getElementById(noteId);
+    if (!note) {
+      note = document.createElement('div');
+      note.id = noteId;
+      note.style.cssText = 'display:flex; align-items:center; gap:8px; font-size:0.78rem; color:var(--slate-500); margin-bottom:10px; padding:8px 12px; background:var(--blue-soft); border-radius:8px;';
+      menuSel.parentNode.insertBefore(note, menuSel.nextSibling);
+    }
+    if (isWeekManual()) {
+      note.style.display = 'flex';
+      note.innerHTML = `<span style="flex:1">Estás viendo Semana ${currentWeek + 1} fija. La semana de hoy según calendario es la ${auto + 1}.</span>
+        <button id="backToAutoBtn" style="background:var(--blue); color:white; border:none; padding:6px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer; font-family:inherit; flex-shrink:0;">Volver a auto</button>`;
+    } else {
+      note.style.display = 'none';
+    }
+  }
+}
+
+// ========== Render: compras ==========
+function renderCompras() {
+  const data = SHOPPING_WEEKS[currentWeek];
+  if (!data) return;
+  const fill = (id, items) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = items.map(text => `<li class="check-item"><div class="check-box"></div>${text}</li>`).join('');
+    el.querySelectorAll('.check-item').forEach(i => {
+      i.addEventListener('click', () => i.classList.toggle('checked'));
+    });
+  };
+  fill('comprasProteinas', data.proteinas);
+  fill('comprasVerduras', data.verduras);
+  fill('comprasFrutas', data.frutas);
+  fill('comprasAlmacen', data.almacen);
 }
 
 // ========== Render: menú (con recetas) ==========
@@ -2906,6 +3135,7 @@ async function init() {
   renderHistory();
   renderWeekSelector();
   renderMenu();
+  renderCompras();
   renderGoals();
   // tab inicial: del hash o 'inicio'
   const hash = (location.hash || '').replace('#/', '');
