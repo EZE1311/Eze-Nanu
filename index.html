@@ -589,8 +589,11 @@
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
+  .exercise-item .ex-name {
+    flex: 1;
+    min-width: 0;
+  }
   .exercise-item .reps {
-    margin-left: auto;
     font-weight: 700;
     color: var(--slate-700);
     font-size: 0.78rem;
@@ -598,6 +601,29 @@
     padding: 3px 8px;
     border-radius: 6px;
     flex-shrink: 0;
+  }
+  .demo-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #FEE2E2;
+    color: #DC2626;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .demo-btn:hover {
+    background: #DC2626;
+    color: white;
+    transform: scale(1.05);
+  }
+  .demo-btn svg {
+    width: 13px;
+    height: 13px;
+    margin-left: 1px;
   }
 
   /* WEIGHT TRACKER */
@@ -1227,6 +1253,8 @@
 
     <!-- SUB: Rutinas -->
     <div class="sub-content" data-sub-pane="rutinas" style="display:none;">
+      <p style="font-size: 0.78rem; color: var(--slate-500); margin: 0 0 12px; padding: 8px 12px; background: var(--slate-50); border-radius: 8px;">💡 Tocá <span style="display:inline-flex;width:18px;height:18px;background:#FEE2E2;color:#DC2626;border-radius:5px;align-items:center;justify-content:center;font-size:0.6rem;">▶</span> al lado de cualquier ejercicio para ver tutoriales en YouTube.</p>
+
       <div class="card">
         <div class="card-header">
           <div class="card-title">💪 Eze · Rutina A — Tren superior</div>
@@ -1234,11 +1262,11 @@
         </div>
         <p style="font-size: 0.82rem; color: var(--slate-500); margin: 0 0 8px;">Calentar 5 min, circuito x 3-4 vueltas con 1 min descanso, estirar 5 min.</p>
         <ul class="exercise-list">
-          <li class="exercise-item">Flexiones (rodillas si hace falta)<span class="reps">12</span></li>
-          <li class="exercise-item">Remo inclinado con mochila 5-8 kg<span class="reps">15</span></li>
-          <li class="exercise-item">Elevaciones laterales con botellas 1,5 L<span class="reps">20</span></li>
-          <li class="exercise-item">Dips en silla<span class="reps">15</span></li>
-          <li class="exercise-item">Plancha frontal<span class="reps">30 s</span></li>
+          <li class="exercise-item"><span class="ex-name">Flexiones (rodillas si hace falta)</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=como+hacer+flexiones+correctamente+principiantes" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">12</span></li>
+          <li class="exercise-item"><span class="ex-name">Remo inclinado con mochila 5-8 kg</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=remo+inclinado+con+mochila+casa+peso+corporal" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">15</span></li>
+          <li class="exercise-item"><span class="ex-name">Elevaciones laterales con botellas 1,5 L</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=elevaciones+laterales+hombros+casa+botellas" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">20</span></li>
+          <li class="exercise-item"><span class="ex-name">Dips en silla</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=dips+en+silla+triceps+casa+correctamente" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">15</span></li>
+          <li class="exercise-item"><span class="ex-name">Plancha frontal</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=como+hacer+plancha+frontal+correctamente" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">30 s</span></li>
         </ul>
       </div>
 
@@ -1249,11 +1277,11 @@
         </div>
         <p style="font-size: 0.82rem; color: var(--slate-500); margin: 0 0 8px;">Calentar 5 min, circuito x 4 vueltas con 1 min descanso, estirar 5 min.</p>
         <ul class="exercise-list">
-          <li class="exercise-item">Sentadillas (sin peso al inicio)<span class="reps">20</span></li>
-          <li class="exercise-item">Zancadas alternadas (6 por pierna)<span class="reps">12</span></li>
-          <li class="exercise-item">Puentes glúteos<span class="reps">15</span></li>
-          <li class="exercise-item">Elevaciones de talón parado<span class="reps">20</span></li>
-          <li class="exercise-item">Plancha lateral cada lado<span class="reps">30 s</span></li>
+          <li class="exercise-item"><span class="ex-name">Sentadillas (sin peso al inicio)</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=como+hacer+sentadillas+correctamente+principiantes" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">20</span></li>
+          <li class="exercise-item"><span class="ex-name">Zancadas alternadas (6 por pierna)</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=como+hacer+zancadas+correctamente+principiantes" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">12</span></li>
+          <li class="exercise-item"><span class="ex-name">Puentes glúteos</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=puente+de+gluteos+correctamente" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">15</span></li>
+          <li class="exercise-item"><span class="ex-name">Elevaciones de talón parado</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=elevaciones+de+talon+gemelos+casa" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">20</span></li>
+          <li class="exercise-item"><span class="ex-name">Plancha lateral cada lado</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=plancha+lateral+correctamente" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">30 s</span></li>
         </ul>
         <p style="font-size: 0.82rem; color: var(--slate-500); margin: 10px 0 0;"><strong>Progresión:</strong> sem 1-2: 3 vueltas · sem 3-5: 4 vueltas · sem 6+: agregar mochila cargada.</p>
       </div>
@@ -1265,11 +1293,11 @@
         </div>
         <p style="font-size: 0.82rem; color: var(--slate-500); margin: 0 0 8px;">Calentar 3 min, circuito x 3 vueltas con 45 s descanso, estirar 2 min.</p>
         <ul class="exercise-list">
-          <li class="exercise-item">Sentadillas<span class="reps">15</span></li>
-          <li class="exercise-item">Puentes glúteos<span class="reps">12</span></li>
-          <li class="exercise-item">Plancha (rodillas si hace falta)<span class="reps">30 s</span></li>
-          <li class="exercise-item">Zancadas alternadas<span class="reps">12</span></li>
-          <li class="exercise-item">Abdominales bicicleta<span class="reps">15</span></li>
+          <li class="exercise-item"><span class="ex-name">Sentadillas</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=como+hacer+sentadillas+correctamente+principiantes" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">15</span></li>
+          <li class="exercise-item"><span class="ex-name">Puentes glúteos</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=puente+de+gluteos+correctamente" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">12</span></li>
+          <li class="exercise-item"><span class="ex-name">Plancha (rodillas si hace falta)</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=plancha+rodillas+principiantes+mujer" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">30 s</span></li>
+          <li class="exercise-item"><span class="ex-name">Zancadas alternadas</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=como+hacer+zancadas+correctamente+principiantes" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">12</span></li>
+          <li class="exercise-item"><span class="ex-name">Abdominales bicicleta</span><a class="demo-btn" href="https://www.youtube.com/results?search_query=abdominales+bicicleta+correctamente" target="_blank" rel="noopener" title="Ver demo"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></a><span class="reps">15</span></li>
         </ul>
       </div>
 
