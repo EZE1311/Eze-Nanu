@@ -1683,6 +1683,25 @@
 
 </main>
 
+<!-- Modal de edición de peso -->
+<div class="modal-backdrop" id="editWeightModal">
+  <div class="modal" style="max-width: 400px;">
+    <div class="modal-header">
+      <div class="modal-title">Editar pesaje</div>
+      <button class="modal-close" id="closeEditWeight">✕</button>
+    </div>
+    <p class="help" id="editWeightDate" style="margin: 4px 0 0;">—</p>
+    <label>Eze (kg)</label>
+    <input type="number" step="0.1" id="editEzeInput" inputmode="decimal" placeholder="vacío = sin dato">
+    <label>Nadia (kg)</label>
+    <input type="number" step="0.1" id="editNadiaInput" inputmode="decimal" placeholder="vacío = sin dato">
+    <div class="modal-actions">
+      <button class="btn-secondary" id="deleteWeightBtn" style="background:#FEE2E2; color:#B91C1C;">🗑 Eliminar</button>
+      <button class="btn-primary" id="saveEditWeight">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal de receta -->
 <div class="modal-backdrop" id="recipeModal">
   <div class="recipe-modal">
@@ -2148,8 +2167,11 @@ const STORAGE_KEY = "ezeNanu_v1";
 const TOKEN_KEY = "ezeNanu_token";
 
 function loadState() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { weights: [], updated_at: null }; }
-  catch { return { weights: [], updated_at: null }; }
+  try {
+    const s = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { weights: [], updated_at: null };
+    if (typeof dedupeWeights === 'function' && Array.isArray(s.weights)) s.weights = dedupeWeights(s.weights);
+    return s;
+  } catch { return { weights: [], updated_at: null }; }
 }
 function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
 let state = loadState();
@@ -2193,7 +2215,14 @@ async function fetchGist() {
     const localUpdated = new Date(state.updated_at || 0).getTime();
     if (remoteUpdated >= localUpdated) {
       state = remote;
+      const before = JSON.stringify(state.weights);
+      if (Array.isArray(state.weights)) state.weights = dedupeWeights(state.weights);
+      const after = JSON.stringify(state.weights);
       saveState(state);
+      // Si la limpieza cambió la lista, sincronizamos al gist (cleanup automático)
+      if (before !== after && getToken()) {
+        try { await pushGist(); } catch (e) {}
+      }
     }
     setSyncStatus('ok', 'al día');
     setLastSync(new Date());
@@ -2506,7 +2535,9 @@ function renderHistory() {
     const realIdx = state.weights.length - 1 - idx;
     const prev = realIdx > 0 ? state.weights[realIdx - 1] : null;
     const row = document.createElement('div');
-    row.className = 'history-row';
+    row.className = 'history-row clickable';
+    row.style.cursor = 'pointer';
+    row.title = 'Tocar para editar o eliminar';
     const date = new Date(entry.date).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
     function delta(p) {
       const cur = entry[p];
@@ -2518,11 +2549,43 @@ function renderHistory() {
       return `${cur.toFixed(1)} <span class="delta ${cls}">${sign}${d.toFixed(1)}</span>`;
     }
     row.innerHTML = `<div>${date}</div><div>${delta('eze')}</div><div>${delta('nadia')}</div>`;
+    row.addEventListener('click', () => openEditWeight(entry.date));
     div.appendChild(row);
   });
+
+  // Hint sutil debajo
+  if (state.weights.length > 0) {
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-size:0.7rem; color:var(--slate-500); margin-top:8px; text-align:center; font-style:italic;';
+    hint.textContent = 'Tocá una fila para editar o eliminar';
+    div.appendChild(hint);
+  }
 }
 
-// ========== Save weight ==========
+// hover style para filas clickeables
+const styleEl = document.createElement('style');
+styleEl.textContent = '.history-row.clickable { transition: background 0.1s; border-radius: 6px; padding-left: 4px; padding-right: 4px; } .history-row.clickable:hover { background: rgba(34,197,94,0.10); }';
+document.head.appendChild(styleEl);
+
+// ========== Dedupe por día (mismo día = una sola fila) ==========
+function dedupeWeights(weights) {
+  const byDate = new Map();
+  for (const w of weights) {
+    if (!w || !w.date) continue;
+    const dayKey = w.date.slice(0, 10); // YYYY-MM-DD
+    if (!byDate.has(dayKey)) {
+      byDate.set(dayKey, { ...w });
+    } else {
+      const existing = byDate.get(dayKey);
+      if (w.eze != null) existing.eze = w.eze;
+      if (w.nadia != null) existing.nadia = w.nadia;
+      if (w.date > existing.date) existing.date = w.date;
+    }
+  }
+  return Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+// ========== Save weight (merge si ya hay del día) ==========
 document.getElementById('saveWeight').addEventListener('click', async () => {
   const eze = parseFloat(document.getElementById('weightEze').value);
   const nadia = parseFloat(document.getElementById('weightNadia').value);
@@ -2530,23 +2593,95 @@ document.getElementById('saveWeight').addEventListener('click', async () => {
     alert("Ingresá al menos un peso");
     return;
   }
-  state.weights.push({
-    date: new Date().toISOString(),
-    eze: isNaN(eze) ? null : eze,
-    nadia: isNaN(nadia) ? null : nadia
-  });
+  const todayKey = new Date().toISOString().slice(0, 10);
+  let entry = state.weights.find(w => w.date && w.date.slice(0, 10) === todayKey);
+  if (entry) {
+    if (!isNaN(eze)) entry.eze = eze;
+    if (!isNaN(nadia)) entry.nadia = nadia;
+    entry.date = new Date().toISOString();
+  } else {
+    state.weights.push({
+      date: new Date().toISOString(),
+      eze: isNaN(eze) ? null : eze,
+      nadia: isNaN(nadia) ? null : nadia
+    });
+  }
+  state.weights = dedupeWeights(state.weights);
   saveState(state);
   document.getElementById('weightEze').value = '';
   document.getElementById('weightNadia').value = '';
   renderStats();
   renderHistory();
   renderGoals();
-  // sync a la nube si hay token
   if (getToken()) {
     await pushGist();
   } else {
     setSyncStatus('no-token', 'solo este dispositivo');
   }
+});
+
+// ========== Edit/Delete weight ==========
+let editingDate = null;
+let confirmingDelete = false;
+
+function openEditWeight(date) {
+  const entry = state.weights.find(w => w.date === date);
+  if (!entry) return;
+  editingDate = date;
+  confirmingDelete = false;
+  document.getElementById('editEzeInput').value = entry.eze != null ? entry.eze : '';
+  document.getElementById('editNadiaInput').value = entry.nadia != null ? entry.nadia : '';
+  const d = new Date(date);
+  document.getElementById('editWeightDate').textContent =
+    d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('deleteWeightBtn').textContent = '🗑 Eliminar';
+  document.getElementById('deleteWeightBtn').style.background = '#FEE2E2';
+  document.getElementById('deleteWeightBtn').style.color = '#B91C1C';
+  document.getElementById('editWeightModal').classList.add('open');
+}
+function closeEditWeight() {
+  editingDate = null;
+  confirmingDelete = false;
+  document.getElementById('editWeightModal').classList.remove('open');
+}
+document.getElementById('closeEditWeight').addEventListener('click', closeEditWeight);
+document.getElementById('editWeightModal').addEventListener('click', e => {
+  if (e.target.id === 'editWeightModal') closeEditWeight();
+});
+document.getElementById('saveEditWeight').addEventListener('click', async () => {
+  if (!editingDate) return;
+  const eze = parseFloat(document.getElementById('editEzeInput').value);
+  const nadia = parseFloat(document.getElementById('editNadiaInput').value);
+  if (isNaN(eze) && isNaN(nadia)) {
+    if (!confirm("Los dos campos quedaron vacíos. ¿Querés eliminar este registro?")) return;
+    state.weights = state.weights.filter(w => w.date !== editingDate);
+  } else {
+    const idx = state.weights.findIndex(w => w.date === editingDate);
+    if (idx !== -1) {
+      state.weights[idx].eze = isNaN(eze) ? null : eze;
+      state.weights[idx].nadia = isNaN(nadia) ? null : nadia;
+    }
+  }
+  state.weights = dedupeWeights(state.weights);
+  saveState(state);
+  closeEditWeight();
+  renderStats(); renderHistory(); renderGoals();
+  if (getToken()) await pushGist();
+});
+document.getElementById('deleteWeightBtn').addEventListener('click', async () => {
+  if (!editingDate) return;
+  if (!confirmingDelete) {
+    confirmingDelete = true;
+    document.getElementById('deleteWeightBtn').textContent = '⚠ Confirmar eliminación';
+    document.getElementById('deleteWeightBtn').style.background = '#DC2626';
+    document.getElementById('deleteWeightBtn').style.color = 'white';
+    return;
+  }
+  state.weights = state.weights.filter(w => w.date !== editingDate);
+  saveState(state);
+  closeEditWeight();
+  renderStats(); renderHistory(); renderGoals();
+  if (getToken()) await pushGist();
 });
 
 // ========== Render: selector de semana ==========
