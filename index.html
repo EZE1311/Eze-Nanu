@@ -78,6 +78,11 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 1.15rem;
   }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
   .topbar-meta {
     text-align: right;
     font-size: 0.78rem;
@@ -85,6 +90,139 @@
     line-height: 1.3;
   }
   .topbar-meta strong { display: block; font-size: 0.92rem; opacity: 1; font-weight: 600; text-transform: capitalize; }
+  .icon-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.25); }
+  .icon-btn svg { width: 18px; height: 18px; }
+  .sync-dot {
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--yellow);
+    border: 2px solid var(--green-dark);
+  }
+  .sync-dot.ok { background: #4ADE80; }
+  .sync-dot.err { background: #F87171; }
+
+  /* MODAL */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.5);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 16px;
+    max-width: 460px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .modal-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  .modal-close {
+    background: var(--slate-100);
+    border: none;
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--slate-700);
+    font-size: 1rem;
+  }
+  .modal label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 12px 0 6px;
+  }
+  .modal input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--slate-200);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: var(--slate-50);
+  }
+  .modal input:focus {
+    outline: none;
+    border-color: var(--green);
+    background: white;
+    box-shadow: 0 0 0 3px var(--green-soft);
+  }
+  .modal .help {
+    font-size: 0.8rem;
+    color: var(--slate-500);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .modal .help a { color: var(--green-dark); }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .btn-primary, .btn-secondary {
+    flex: 1;
+    padding: 11px 16px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--green); color: white; }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-secondary { background: var(--slate-100); color: var(--slate-700); }
+  .sync-status {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--slate-50);
+    border-radius: 10px;
+    font-size: 0.82rem;
+    color: var(--slate-700);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sync-status .label-key {
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+  }
 
   /* TAB BAR (top, sticky under topbar) */
   .tabbar {
@@ -715,12 +853,65 @@
       <div class="brand-logo">💪</div>
       <span>Eze &amp; Nanu</span>
     </div>
-    <div class="topbar-meta">
-      <strong id="topDate">—</strong>
-      <span id="topGreeting">Plan integral</span>
+    <div class="topbar-right">
+      <div class="topbar-meta">
+        <strong id="topDate">—</strong>
+        <span id="topGreeting">Plan integral</span>
+      </div>
+      <button class="icon-btn" id="settingsBtn" title="Sincronización">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span class="sync-dot" id="syncDot"></span>
+      </button>
     </div>
   </div>
 </header>
+
+<!-- Modal de sincronización -->
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">⚙️ Sincronización</div>
+      <button class="modal-close" id="closeSettings">✕</button>
+    </div>
+
+    <p style="font-size: 0.88rem; color: var(--slate-700); margin: 4px 0 0;">
+      Los datos del peso se guardan en un Gist privado, así sincronizan entre tus dispositivos.
+      Para <strong>escribir</strong> necesitás un token. Para solo <strong>leer</strong> no hace falta.
+    </p>
+
+    <label>Tu Personal Access Token (GitHub)</label>
+    <input type="password" id="tokenInput" placeholder="ghp_..." autocomplete="off">
+    <div class="help">
+      Se guarda solo en este dispositivo (localStorage), nunca se sube al repo.
+      <br>
+      <strong>Para crear uno seguro</strong> (scope solo <code>gist</code>):
+      <br>1. Andá a <a href="https://github.com/settings/tokens/new?scopes=gist&description=Eze-Nanu-tracker" target="_blank">esta URL</a> (ya tiene los datos pre-cargados).
+      <br>2. Clic en <strong>Generate token</strong>.
+      <br>3. Copiá el token y pegalo acá.
+    </div>
+
+    <div class="sync-status">
+      <div>
+        <div class="label-key">Última sync</div>
+        <div id="lastSync">—</div>
+      </div>
+      <div style="text-align: right;">
+        <div class="label-key">Estado</div>
+        <div id="syncStatus">—</div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" id="syncNow">Sincronizar ahora</button>
+      <button class="btn-primary" id="saveToken">Guardar token</button>
+    </div>
+
+    <p style="font-size: 0.75rem; color: var(--slate-500); margin-top: 14px; line-height: 1.5;">
+      Gist: <code style="font-size: 0.7rem;">6ee451548fad3b8cc3824ec14c9e532f</code> ·
+      <a href="https://gist.github.com/EZE1311/6ee451548fad3b8cc3824ec14c9e532f" target="_blank" style="color: var(--slate-700);">ver en GitHub</a>
+    </p>
+  </div>
+</div>
 
 <nav class="tabbar">
   <div class="tabbar-inner">
@@ -1255,14 +1446,134 @@ const MENU = [
 
 const DAY_NAMES_FULL = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
 
-// ========== Estado ==========
+// ========== Sync con Gist ==========
+const GIST_ID = "6ee451548fad3b8cc3824ec14c9e532f";
+const GIST_FILE = "weights.json";
 const STORAGE_KEY = "ezeNanu_v1";
+const TOKEN_KEY = "ezeNanu_token";
+
 function loadState() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { weights: [] }; }
-  catch { return { weights: [] }; }
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { weights: [], updated_at: null }; }
+  catch { return { weights: [], updated_at: null }; }
 }
 function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
 let state = loadState();
+
+function getToken() { return localStorage.getItem(TOKEN_KEY) || ""; }
+function setToken(t) {
+  if (t) localStorage.setItem(TOKEN_KEY, t);
+  else localStorage.removeItem(TOKEN_KEY);
+}
+
+let syncStatus = "idle"; // idle | syncing | ok | err | no-token
+function setSyncStatus(s, msg) {
+  syncStatus = s;
+  const dot = document.getElementById('syncDot');
+  if (!dot) return;
+  dot.classList.remove('ok','err');
+  if (s === 'ok') dot.classList.add('ok');
+  else if (s === 'err') dot.classList.add('err');
+  // text in modal
+  const st = document.getElementById('syncStatus');
+  if (st) st.textContent = msg || s;
+}
+function setLastSync(d) {
+  const el = document.getElementById('lastSync');
+  if (!el) return;
+  el.textContent = d ? new Date(d).toLocaleString('es-AR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '—';
+}
+
+async function fetchGist() {
+  // Lectura: con o sin token funciona (gist secreto pero accesible con el ID)
+  setSyncStatus('syncing', 'leyendo...');
+  try {
+    const resp = await fetch(`https://api.github.com/gists/${GIST_ID}`, { cache: 'no-store' });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    const file = data.files[GIST_FILE];
+    if (!file) throw new Error("archivo no encontrado en gist");
+    const remote = JSON.parse(file.content);
+    // Merge: el remote es la fuente de verdad. Si local tiene cosas más nuevas (offline), las preservamos.
+    const remoteUpdated = new Date(remote.updated_at || 0).getTime();
+    const localUpdated = new Date(state.updated_at || 0).getTime();
+    if (remoteUpdated >= localUpdated) {
+      state = remote;
+      saveState(state);
+    }
+    setSyncStatus('ok', 'al día');
+    setLastSync(new Date());
+    return true;
+  } catch (e) {
+    console.error('fetchGist error', e);
+    setSyncStatus('err', 'error: ' + e.message);
+    return false;
+  }
+}
+
+async function pushGist() {
+  const token = getToken();
+  if (!token) {
+    setSyncStatus('err', 'sin token (no se guardó en la nube)');
+    return false;
+  }
+  setSyncStatus('syncing', 'guardando...');
+  try {
+    state.updated_at = new Date().toISOString();
+    saveState(state);
+    const body = {
+      files: {
+        [GIST_FILE]: { content: JSON.stringify(state, null, 2) }
+      }
+    };
+    const resp = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    setSyncStatus('ok', 'guardado');
+    setLastSync(new Date());
+    return true;
+  } catch (e) {
+    console.error('pushGist error', e);
+    setSyncStatus('err', 'error: ' + e.message);
+    return false;
+  }
+}
+
+// ========== Modal handlers ==========
+const settingsModal = document.getElementById('settingsModal');
+document.getElementById('settingsBtn').addEventListener('click', () => {
+  document.getElementById('tokenInput').value = getToken();
+  settingsModal.classList.add('open');
+});
+document.getElementById('closeSettings').addEventListener('click', () => {
+  settingsModal.classList.remove('open');
+});
+settingsModal.addEventListener('click', e => {
+  if (e.target === settingsModal) settingsModal.classList.remove('open');
+});
+document.getElementById('saveToken').addEventListener('click', async () => {
+  const v = document.getElementById('tokenInput').value.trim();
+  setToken(v);
+  if (v) {
+    // Test rápido: pushear estado actual
+    const ok = await pushGist();
+    if (ok) alert("Token guardado y verificado ✓");
+    else alert("Token guardado pero hubo un error al sincronizar — chequeá scope `gist`");
+  } else {
+    alert("Token borrado de este dispositivo (modo solo-lectura)");
+    setSyncStatus('no-token', 'solo lectura');
+  }
+});
+document.getElementById('syncNow').addEventListener('click', async () => {
+  await fetchGist();
+  renderStats(); renderHistory(); renderGoals();
+});
 
 // ========== Render: top bar ==========
 function renderTopBar() {
@@ -1355,7 +1666,7 @@ function renderHistory() {
 }
 
 // ========== Save weight ==========
-document.getElementById('saveWeight').addEventListener('click', () => {
+document.getElementById('saveWeight').addEventListener('click', async () => {
   const eze = parseFloat(document.getElementById('weightEze').value);
   const nadia = parseFloat(document.getElementById('weightNadia').value);
   if (isNaN(eze) && isNaN(nadia)) {
@@ -1373,6 +1684,12 @@ document.getElementById('saveWeight').addEventListener('click', () => {
   renderStats();
   renderHistory();
   renderGoals();
+  // sync a la nube si hay token
+  if (getToken()) {
+    await pushGist();
+  } else {
+    setSyncStatus('no-token', 'solo este dispositivo');
+  }
 });
 
 // ========== Render: menú ==========
@@ -1471,7 +1788,7 @@ document.querySelectorAll('.check-item').forEach(i => {
 });
 
 // ========== Init ==========
-function init() {
+async function init() {
   renderTopBar();
   renderToday();
   renderStats();
@@ -1482,6 +1799,17 @@ function init() {
   const hash = (location.hash || '').replace('#/', '');
   const validTabs = ['inicio','comida','ejercicio','objetivos','salud'];
   activateTab(validTabs.includes(hash) ? hash : 'inicio');
+
+  // Estado inicial del dot
+  if (!getToken()) setSyncStatus('no-token', 'solo lectura (sin token)');
+
+  // Pull inicial del gist (lee aunque no haya token)
+  const ok = await fetchGist();
+  if (ok) {
+    renderStats();
+    renderHistory();
+    renderGoals();
+  }
 }
 init();
 </script>
