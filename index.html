@@ -461,15 +461,24 @@
   .meal-content {
     color: var(--slate-700);
   }
-  .meal-content .who {
+  .who {
     display: inline-block;
+    background: rgba(0,0,0,0.15);
+    color: inherit;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 5px;
+    margin-right: 5px;
+    vertical-align: 1px;
+  }
+  .meal-content .who {
     background: var(--slate-100);
     color: var(--slate-700);
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 1px 6px;
-    border-radius: 4px;
-    margin-right: 4px;
+  }
+  .today-card .who {
+    background: rgba(255,255,255,0.22);
+    color: white;
   }
 
   /* CHECKLIST */
@@ -885,6 +894,61 @@
   }
   .milestone-body { font-size: 0.85rem; color: var(--slate-700); }
 
+  /* CAROUSEL DE DÍAS (inicio) */
+  .day-carousel {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    background: white;
+    border: 1px solid var(--slate-200);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 5;
+    color: var(--slate-700);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow);
+    transition: all 0.15s;
+    font-family: inherit;
+    padding: 0;
+  }
+  .carousel-nav svg { width: 20px; height: 20px; }
+  .carousel-nav.prev { left: -8px; }
+  .carousel-nav.next { right: -8px; }
+  .carousel-nav:hover:not(:disabled) { background: var(--green-soft); color: var(--green-dark); }
+  .carousel-nav:disabled { opacity: 0.35; cursor: default; }
+  .day-pager {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--slate-500);
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+  .day-pager .pager-pill {
+    background: var(--slate-100);
+    color: var(--slate-700);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    font-size: 0.78rem;
+  }
+  .day-pager .pager-pill:hover { background: var(--green-soft); color: var(--green-dark); }
+  /* fade animation */
+  .today-card { transition: opacity 0.18s ease, transform 0.18s ease; }
+  .today-card.fading-left { opacity: 0; transform: translateX(-20px); }
+  .today-card.fading-right { opacity: 0; transform: translateX(20px); }
+
   /* TODAY HIGHLIGHT (inicio) */
   .today-card {
     background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
@@ -1081,22 +1145,34 @@
   <!-- ============== INICIO ============== -->
   <section class="pane" data-pane="inicio">
 
-    <div class="today-card" id="todayCard">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-        <div>
-          <div class="label">Hoy es</div>
-          <div class="day-name" id="todayName">—</div>
+    <div class="day-carousel">
+      <button class="carousel-nav prev" id="prevDayBtn" aria-label="Día anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="carousel-nav next" id="nextDayBtn" aria-label="Día siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+      <div class="today-card" id="todayCard">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+          <div>
+            <div class="label" id="todayLabel">Hoy es</div>
+            <div class="day-name" id="todayName">—</div>
+            <div id="todayDateSub" style="font-size:0.78rem; opacity:0.85; margin-top:2px;"></div>
+          </div>
+          <div id="todayWeekBadge" style="text-align:right; font-size:0.78rem; opacity:0.92;">
+            <div style="font-size:0.65rem; opacity:0.7; text-transform:uppercase; letter-spacing:0.06em;">Menú</div>
+            <div style="font-weight:700;" id="todayWeekLabel">—</div>
+          </div>
         </div>
-        <div id="todayWeekBadge" style="text-align:right; font-size:0.78rem; opacity:0.92;">
-          <div style="font-size:0.65rem; opacity:0.7; text-transform:uppercase; letter-spacing:0.06em;">Menú</div>
-          <div style="font-weight:700;" id="todayWeekLabel">—</div>
+        <div id="todayMealsList" style="margin-top:14px;"></div>
+        <div class="today-row" id="todayWorkoutRow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14.4 14.4l4.2 4.2M5.4 5.4l4.2 4.2M19.5 18l-3-3M3 4.5L6 7.5"/><path d="M19 5l-1 1M5 19l1-1M21 12h-2M5 12H3"/></svg>
+          <div><strong>Ejercicio</strong><span id="todayWorkout">—</span></div>
         </div>
       </div>
-      <div id="todayMealsList" style="margin-top:14px;"></div>
-      <div class="today-row" id="todayWorkoutRow">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14.4 14.4l4.2 4.2M5.4 5.4l4.2 4.2M19.5 18l-3-3M3 4.5L6 7.5"/><path d="M19 5l-1 1M5 19l1-1M21 12h-2M5 12H3"/></svg>
-        <div><strong>Ejercicio</strong><span id="todayWorkout">—</span></div>
-      </div>
+    </div>
+    <div class="day-pager" id="dayPager">
+      <button class="pager-pill" id="pagerToToday" style="display:none;">↺ Volver a hoy</button>
     </div>
 
     <h2>Estado actual</h2>
@@ -2190,14 +2266,19 @@ function renderTopBar() {
 // Cada domingo a las 00:00 avanza a la siguiente del ciclo de 4 semanas.
 const WEEK_ANCHOR = new Date(2026, 4, 10); // mes 0-indexed: 4 = mayo
 WEEK_ANCHOR.setHours(0, 0, 0, 0);
-function autoWeek() {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  if (now < WEEK_ANCHOR) return 0; // antes del arranque, mostramos Sem 1
-  const days = Math.floor((now - WEEK_ANCHOR) / 86400000);
-  const weekIndex = Math.floor(days / 7);
-  return weekIndex % MENU_WEEKS.length;
+function autoWeek(refDate) {
+  const d = new Date(refDate || new Date());
+  d.setHours(0, 0, 0, 0);
+  if (d < WEEK_ANCHOR) return 0;
+  const days = Math.floor((d - WEEK_ANCHOR) / 86400000);
+  return Math.floor(days / 7) % MENU_WEEKS.length;
 }
+
+// Offset de día en el carousel del Inicio
+let currentDayOffset = 0;
+const DAY_OFFSET_MIN = -3;
+const DAY_OFFSET_MAX = 14;
+const MONTHS_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 function isWeekManual() {
   return localStorage.getItem('ezeNanu_week_mode') === 'manual';
 }
@@ -2213,23 +2294,48 @@ function setWeekAuto() {
 }
 
 function renderToday() {
-  const dow = new Date().getDay();
-  document.getElementById('todayName').textContent = DAY_NAMES_FULL[dow];
+  const date = new Date();
+  date.setDate(date.getDate() + currentDayOffset);
+  const dow = date.getDay();
 
-  // Inicio SIEMPRE usa la semana auto (calendario).
-  // El selector manual de Comida no afecta esta vista.
-  const todayWeek = autoWeek();
-  document.getElementById('todayWeekLabel').textContent = `Semana ${todayWeek + 1}`;
-
-  // Comidas del día desde el menú real (semana del calendario)
-  const week = MENU_WEEKS[todayWeek];
-  const today = week.find(d => d.id === dow);
-  const list = document.getElementById('todayMealsList');
-  if (!today) {
-    list.innerHTML = '';
-    return;
+  // Etiqueta del día según offset
+  const labelEl = document.getElementById('todayLabel');
+  const nameEl = document.getElementById('todayName');
+  const subEl = document.getElementById('todayDateSub');
+  const dayName = DAY_NAMES_FULL[dow];
+  const dateStr = `${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}`;
+  if (currentDayOffset === 0) {
+    labelEl.textContent = 'Hoy es';
+    nameEl.textContent = dayName;
+    subEl.textContent = dateStr;
+  } else if (currentDayOffset === 1) {
+    labelEl.textContent = 'Mañana';
+    nameEl.textContent = dayName;
+    subEl.textContent = dateStr;
+  } else if (currentDayOffset === -1) {
+    labelEl.textContent = 'Ayer fue';
+    nameEl.textContent = dayName;
+    subEl.textContent = dateStr;
+  } else if (currentDayOffset > 0) {
+    labelEl.textContent = `En ${currentDayOffset} días`;
+    nameEl.textContent = dayName;
+    subEl.textContent = dateStr;
+  } else {
+    labelEl.textContent = `Hace ${Math.abs(currentDayOffset)} días`;
+    nameEl.textContent = dayName;
+    subEl.textContent = dateStr;
   }
-  const breakfast = Array.isArray(today.b) ? today.b.join(' · ') : today.b;
+
+  // Semana del menú correspondiente a esa fecha
+  const wk = autoWeek(date);
+  document.getElementById('todayWeekLabel').textContent = `Semana ${wk + 1}`;
+
+  // Comidas del día
+  const week = MENU_WEEKS[wk];
+  const day = week.find(d => d.id === dow);
+  const list = document.getElementById('todayMealsList');
+  if (!day) { list.innerHTML = ''; return; }
+  const breakfast = Array.isArray(day.b) ? day.b.join(' · ') : day.b;
   const mealRow = (icon, label, text) => `
     <div class="today-row">
       <div style="font-size:1.05rem; line-height:1;">${icon}</div>
@@ -2238,12 +2344,81 @@ function renderToday() {
   `;
   list.innerHTML =
     mealRow('🥐', 'Desayuno', breakfast) +
-    mealRow('🍽️', 'Almuerzo', today.l) +
-    mealRow('☕', 'Merienda', today.m) +
-    mealRow('🌙', 'Cena', today.c);
+    mealRow('🍽️', 'Almuerzo', day.l) +
+    mealRow('☕', 'Merienda', day.m) +
+    mealRow('🌙', 'Cena', day.c);
 
   // Ejercicio
   document.getElementById('todayWorkout').textContent = ' ' + (DAY_WORKOUTS[dow] || '');
+
+  // Estado de navegación
+  document.getElementById('prevDayBtn').disabled = currentDayOffset <= DAY_OFFSET_MIN;
+  document.getElementById('nextDayBtn').disabled = currentDayOffset >= DAY_OFFSET_MAX;
+  document.getElementById('pagerToToday').style.display = currentDayOffset !== 0 ? 'inline-block' : 'none';
+}
+
+// ========== Navegación del carousel ==========
+function navigateDay(direction) {
+  const newOffset = currentDayOffset + direction;
+  if (newOffset < DAY_OFFSET_MIN || newOffset > DAY_OFFSET_MAX) return;
+  const card = document.getElementById('todayCard');
+  const fadeClass = direction > 0 ? 'fading-left' : 'fading-right';
+  card.classList.add(fadeClass);
+  setTimeout(() => {
+    currentDayOffset = newOffset;
+    renderToday();
+    // entrar desde el lado opuesto
+    card.classList.remove('fading-left','fading-right');
+    card.classList.add(direction > 0 ? 'fading-right' : 'fading-left');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        card.classList.remove('fading-left','fading-right');
+      });
+    });
+  }, 180);
+}
+
+// Click en flechas
+document.addEventListener('DOMContentLoaded', () => {
+  // se setean abajo en el setup
+});
+function setupCarousel() {
+  document.getElementById('prevDayBtn').addEventListener('click', () => navigateDay(-1));
+  document.getElementById('nextDayBtn').addEventListener('click', () => navigateDay(1));
+  document.getElementById('pagerToToday').addEventListener('click', () => {
+    if (currentDayOffset === 0) return;
+    const dir = currentDayOffset > 0 ? -1 : 1;
+    const card = document.getElementById('todayCard');
+    card.classList.add(dir > 0 ? 'fading-left' : 'fading-right');
+    setTimeout(() => {
+      currentDayOffset = 0;
+      renderToday();
+      card.classList.remove('fading-left','fading-right');
+      card.classList.add(dir > 0 ? 'fading-right' : 'fading-left');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => card.classList.remove('fading-left','fading-right'));
+      });
+    }, 180);
+  });
+  // swipe touch
+  let startX = 0, startY = 0, swiping = false;
+  const card = document.getElementById('todayCard');
+  card.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    swiping = true;
+  }, { passive: true });
+  card.addEventListener('touchend', e => {
+    if (!swiping) return;
+    swiping = false;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    // sólo horizontal y suficiente
+    if (Math.abs(dx) > 60 && Math.abs(dy) < 50) {
+      navigateDay(dx < 0 ? 1 : -1);
+    }
+  });
+  card.addEventListener('touchcancel', () => { swiping = false; });
 }
 
 // botón "volver a auto" (en Comida)
@@ -2572,6 +2747,7 @@ async function init() {
   }
 
   renderTopBar();
+  setupCarousel();
   renderToday();
   renderStats();
   renderHistory();
