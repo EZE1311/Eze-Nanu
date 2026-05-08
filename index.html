@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan integral — Eze & Nadia</title>
+<style>
+  :root {
+    --primary: #1F4E79;
+    --primary-dark: #14385a;
+    --accent: #C00000;
+    --green: #548235;
+    --soft: #E7F0F7;
+    --soft-warm: #FBE5D6;
+    --warn-bg: #FFF8E1;
+    --warn-border: #BF8F00;
+    --gray: #595959;
+    --gray-light: #BFBFBF;
+    --bg: #FAFAFB;
+    --card: #FFFFFF;
+    --max-w: 860px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: #1a1a1a;
+    line-height: 1.6;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  header.cover {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 64px 24px 56px;
+    text-align: center;
+  }
+  header.cover h1 {
+    margin: 0 0 8px;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  header.cover .subtitle {
+    margin: 0 0 16px;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    opacity: 0.9;
+  }
+  header.cover .names {
+    margin: 0;
+    font-style: italic;
+    opacity: 0.85;
+  }
+  header.cover .date {
+    margin-top: 12px;
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+  nav.toc {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    background: var(--card);
+    border: 1px solid #e5e5e7;
+    border-radius: 12px;
+    padding: 18px 16px;
+    font-size: 0.9rem;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+  }
+  nav.toc h3 {
+    margin: 0 0 10px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray);
+  }
+  nav.toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: nav;
+  }
+  nav.toc li {
+    counter-increment: nav;
+    margin-bottom: 4px;
+  }
+  nav.toc a {
+    display: block;
+    padding: 6px 8px;
+    border-radius: 6px;
+    color: var(--gray);
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  nav.toc a::before {
+    content: counter(nav) ". ";
+    color: var(--gray-light);
+    margin-right: 4px;
+  }
+  nav.toc a:hover {
+    background: var(--soft);
+    color: var(--primary);
+  }
+  main {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 40px clamp(20px, 5vw, 56px);
+    border: 1px solid #e5e5e7;
+  }
+  main section {
+    margin-bottom: 48px;
+    scroll-margin-top: 24px;
+  }
+  main section:last-child { margin-bottom: 0; }
+  h2 {
+    color: var(--primary);
+    font-size: clamp(1.5rem, 3.5vw, 1.875rem);
+    margin: 0 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--soft);
+  }
+  h3 {
+    color: var(--primary);
+    font-size: 1.15rem;
+    margin: 28px 0 8px;
+  }
+  h4 {
+    color: var(--accent);
+    font-size: 1rem;
+    margin: 20px 0 6px;
+  }
+  p { margin: 0 0 12px; }
+  ul, ol { margin: 0 0 12px; padding-left: 24px; }
+  li { margin-bottom: 6px; }
+  li ul { margin-top: 6px; }
+  strong { font-weight: 600; }
+  .lead {
+    font-size: 1.05rem;
+    color: #2a2a2a;
+  }
+  .callout {
+    border-left: 4px solid var(--warn-border);
+    background: var(--warn-bg);
+    padding: 16px 20px;
+    border-radius: 6px;
+    margin: 16px 0 24px;
+  }
+  .callout h4 {
+    color: var(--warn-border);
+    margin: 0 0 8px;
+    font-size: 1rem;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout-info {
+    border-left-color: var(--primary);
+    background: var(--soft);
+  }
+  .callout-info h4 { color: var(--primary); }
+  .callout-warm {
+    border-left-color: #ED7D31;
+    background: var(--soft-warm);
+  }
+  .callout-warm h4 { color: #B5560F; }
+  .table-wrap {
+    overflow-x: auto;
+    margin: 16px 0 24px;
+    border-radius: 8px;
+    border: 1px solid #e5e5e7;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    background: white;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f0f2;
+    vertical-align: top;
+  }
+  th {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  td.day {
+    font-weight: 600;
+    background: var(--soft);
+    color: var(--primary);
+    white-space: nowrap;
+  }
+  tr.weekend td { background: var(--soft-warm); }
+  tr.weekend td.day { background: #F4D7BB; }
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .pill-yes { background: #E2EFDA; color: var(--green); }
+  .pill-no { background: #F8D7DA; color: var(--accent); }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .data-card {
+    background: var(--soft);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .data-card h4 {
+    margin: 0 0 8px;
+    color: var(--primary);
+  }
+  .data-card dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    row-gap: 4px;
+    font-size: 0.9rem;
+  }
+  .data-card dt { color: var(--gray); }
+  .toggle-toc {
+    display: none;
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+  }
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--gray);
+    font-size: 0.85rem;
+  }
+  @media (max-width: 1023px) {
+    .layout { grid-template-columns: 1fr; padding: 16px; }
+    nav.toc {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 280px;
+      max-height: 100vh;
+      transform: translateX(-100%);
+      transition: transform 0.25s;
+      z-index: 200;
+      border-radius: 0;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+    }
+    nav.toc.open { transform: translateX(0); }
+    .toggle-toc { display: flex; align-items: center; justify-content: center; }
+    main { padding: 24px 18px; }
+  }
+  @media print {
+    .toggle-toc, nav.toc { display: none; }
+    .layout { grid-template-columns: 1fr; padding: 0; }
+    main { border: none; padding: 0; }
+    header.cover { background: white; color: black; }
+    a { color: black; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <h1>Plan integral</h1>
+  <p class="subtitle">Alimentación y ejercicio para los dos</p>
+  <p class="names">Ezequiel & Nadia</p>
+  <p class="date">Mayo 2026</p>
+</header>
+
+<button class="toggle-toc" id="tocBtn" aria-label="Índice">☰</button>
+
+<div class="layout">
+  <nav class="toc" id="toc">
+    <h3>Índice</h3>
+    <ol>
+      <li><a href="#resumen">Resumen y filosofía</a></li>
+      <li><a href="#trombosis">Aviso médico — Nadia</a></li>
+      <li><a href="#principios">Principios alimentarios</a></li>
+      <li><a href="#menu">Plan semanal de comidas</a></li>
+      <li><a href="#compras">Lista de compras</a></li>
+      <li><a href="#empleada">Cocina con la empleada</a></li>
+      <li><a href="#reglas">Reglas para no abandonar</a></li>
+      <li><a href="#ejercicio">Plan de ejercicio</a></li>
+      <li><a href="#hitos">Hitos y revisión</a></li>
+      <li><a href="#medico">Cuándo consultar al médico</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section id="resumen">
+      <h2>1. Resumen y filosofía</h2>
+      <p class="lead">Este plan está pensado para los dos juntos. Esa es la regla más importante: los planes individuales fracasan cuando uno empieza a aflojar. Si lo hacen en pareja, las recaídas se contienen — el otro empuja.</p>
+
+      <h3>Punto de partida</h3>
+      <div class="grid-2">
+        <div class="data-card">
+          <h4>Ezequiel</h4>
+          <dl>
+            <dt>Edad</dt><dd>38</dd>
+            <dt>Altura</dt><dd>1,75 m</dd>
+            <dt>Peso actual</dt><dd>110 kg</dd>
+            <dt>Objetivo</dt><dd><strong>90 kg</strong></dd>
+            <dt>Notas</dt><dd>Hígado graso (dx 2024). No come pescado ni brócoli.</dd>
+          </dl>
+        </div>
+        <div class="data-card">
+          <h4>Nadia</h4>
+          <dl>
+            <dt>Edad</dt><dd>33</dd>
+            <dt>Altura</dt><dd>1,64 m</dd>
+            <dt>Peso actual</dt><dd>110 kg</dd>
+            <dt>Objetivo</dt><dd><strong>90 kg</strong></dd>
+            <dt>Notas</dt><dd>Antecedente de trombosis cerebral hace 3 años, recuperada. No toma anticoagulantes. No come lechuga. Ya hace Zumba lunes y miércoles.</dd>
+          </dl>
+        </div>
+      </div>
+
+      <h3>Objetivo del primer ciclo</h3>
+      <ul>
+        <li>Ezequiel: 110 → 90 kg en <strong>7 a 9 meses</strong>, bajando ~0,5–0,7 kg por semana.</li>
+        <li>Nadia: 110 → 90 kg en <strong>9 a 11 meses</strong>, bajando ~0,4–0,5 kg por semana (en mujeres baja un poco más lento, es normal).</li>
+        <li>Hígado graso de Eze: con bajar 7–10% del peso (8–11 kg) ya suele revertirse en gran parte. <strong>Primer hito intermedio: 100 kg.</strong></li>
+        <li>Hito intermedio para los dos: a los 5 kg perdidos, alguna recompensa no-comida (ropa, salida, lo que sea).</li>
+      </ul>
+
+      <h3>Filosofía</h3>
+      <ul>
+        <li><strong>Sostenible &gt; rápido.</strong> No es dieta express. Es un cambio de hábitos para los próximos 9–11 meses. Lo que no podés sostener todo ese tiempo, no entra.</li>
+        <li><strong>Juntos.</strong> Pesarse el mismo día, una caminata juntos por semana, una comida especial planificada cada finde.</li>
+        <li><strong>Hábitos pequeños, repetidos.</strong> Mejor 4 sesiones cortas a la semana que 2 maratones que abandonan al mes.</li>
+        <li><strong>El delivery se planifica, no se prohibe.</strong> Cortar de golpe = recaída. Hay 2 momentos flexibles al fin de semana.</li>
+      </ul>
+    </section>
+
+    <section id="trombosis">
+      <div class="callout">
+        <h4>⚠ Importante — antecedente de trombosis cerebral de Nadia</h4>
+        <p>Aunque Nadia está recuperada y no toma anticoagulantes, antes de arrancar entrenamiento de fuerza estructurado conviene una consulta breve con el neurólogo o cardiólogo de control. Mostrarle el plan y pedir luz verde. Es una conversación de cinco minutos.</p>
+        <p>Mientras tanto: Zumba sigue normal (lo viene haciendo bien), caminatas suaves a moderadas sin problema. Lo que sí evitamos hasta tener OK médico: ejercicios de fuerza muy intensos donde se aguante la respiración (maniobra de Valsalva). En el plan ya estamos con peso corporal y rutinas suaves, así que no es problema, pero conviene aclararlo.</p>
+        <p><strong>Hidratación clave</strong> para los dos, y especialmente para ella: 2,5–3 L de agua por día. Deshidratarse hace la sangre más viscosa.</p>
+        <p><strong>Señales de alarma</strong> para detener y consultar: dolor de cabeza fuerte e inusual, alteraciones de la visión, debilidad o adormecimiento de un lado del cuerpo, dificultad para hablar.</p>
+      </div>
+    </section>
+
+    <section id="principios">
+      <h2>2. Principios alimentarios</h2>
+
+      <h3>Para Ezequiel — clave: hígado graso</h3>
+      <p>El hígado graso responde mejor a estos cambios alimentarios que a casi cualquier medicación. Bajar peso lo revierte; estos puntos lo aceleran.</p>
+      <ul>
+        <li><span class="pill pill-no">Cero o casi cero</span> gaseosas comunes, jugos envasados, alcohol regular (especialmente cerveza), facturas, panificados industriales, embutidos.</li>
+        <li><strong>Reducir mucho:</strong> harinas blancas (pan, pizza, pastas), azúcar agregada, frituras, fiambres grasos.</li>
+        <li><span class="pill pill-yes">Subir</span> verduras (todas menos las que no te gustan), legumbres, omega-3 vegetal (chía, lino, nueces), aceite de oliva, palta, café sin azúcar (sí, ayuda al hígado).</li>
+        <li><strong>Sustituto del pescado:</strong> como no comés pescado, sumá chía y lino diarios (1 cucharada sopera), 5 nueces, palta y huevos. Te cubre el omega-3 que daría el pescado.</li>
+      </ul>
+      <p><strong>Calorías objetivo:</strong> 2.100–2.200 kcal/día. No vamos a contar a mano — el plan está calibrado en porciones.</p>
+
+      <h3>Para Nadia</h3>
+      <p>Sin restricciones médicas dietarias. Foco: déficit calórico moderado y mucha proteína para no perder masa muscular mientras baja.</p>
+      <ul>
+        <li>Mismas reglas generales que Eze.</li>
+        <li>Por la agenda larga (vuelve 21–22 h), la cena tiene que ser liviana y rápida. La dejamos resuelta desde la mañana.</li>
+        <li>Las clases de Zumba ya son cardio: hay que aprovecharlas, no cambiarlas.</li>
+        <li><strong>Desayuno:</strong> generalmente lo hacés en el laburo o súper rápido en casa. El plan tiene opciones para llevar al bolso.</li>
+      </ul>
+      <p><strong>Calorías objetivo:</strong> 1.700–1.800 kcal/día.</p>
+
+      <h3>Reglas comunes</h3>
+      <ul>
+        <li>4 comidas: desayuno, almuerzo, merienda, cena. No saltearse ninguna.</li>
+        <li>Plato principal: ½ verduras + ¼ proteína + ¼ carbo complejo (arroz integral, batata, legumbre, fideo integral).</li>
+        <li>Desayuno con proteína sí o sí (huevos, yogur, queso). Si arrancan con tostada y mermelada, llegan a las 11 con hambre.</li>
+        <li>Agua: 2,5 a 3 L por día. Mate y café sin azúcar cuentan.</li>
+        <li>Stevia o sucralosa para endulzar. Cero azúcar agregada en infusiones.</li>
+        <li>Si está la duda "¿como esto?", la respuesta por defecto es no.</li>
+      </ul>
+    </section>
+
+    <section id="menu">
+      <h2>3. Plan semanal de comidas</h2>
+      <p>Las celdas del desayuno traen opción separada para cada uno cuando hace falta — Nadia desayuna mayormente en el trabajo o súper rápido en casa.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Día</th><th>Desayuno</th><th>Almuerzo</th><th>Merienda</th><th>Cena</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="day">Lunes</td>
+              <td><strong>Eze (casa):</strong> omelet de 2 huevos con tomate y queso port salut light + 1 tostada integral.<br><strong>Nadia (laburo):</strong> yogur firme + 1 fruta + puñado de almendras (lo lleva en bolso).</td>
+              <td>Pollo grillado al limón + ensalada (rúcula, tomate, zanahoria) + ½ taza arroz integral.</td>
+              <td>Yogur natural firme + 1 fruta + 5 nueces.</td>
+              <td>Tortilla de zapallitos al horno (3 huevos, 2 zapallitos, cebolla) + ensalada de tomate.</td>
+            </tr>
+            <tr>
+              <td class="day">Martes</td>
+              <td><strong>Eze:</strong> avena (40 g) cocida con leche descremada, manzana rallada, canela, 1 cda chía.<br><strong>Nadia (home office):</strong> versión rápida — 1 yogur + 2 cdas avena + canela + fruta picada (3 min).</td>
+              <td>Lentejas guisadas con zanahoria, cebolla y morrón (1 plato hondo) + 1 fruta.</td>
+              <td>1 tostada integral con queso port salut light + tomate + té sin azúcar.</td>
+              <td>Pollo al horno (1 pata sin piel) + puré de calabaza con un chorrito de oliva.</td>
+            </tr>
+            <tr>
+              <td class="day">Miércoles</td>
+              <td><strong>Eze:</strong> yogur natural + 3 cdas granola sin azúcar + ½ banana.<br><strong>Nadia (laburo):</strong> tostada integral con queso untable + tomate (la lleva armada) + 1 fruta.</td>
+              <td>Bife magro a la plancha + ensalada (rúcula, zanahoria, cebolla morada) + boniato al horno.</td>
+              <td>1 fruta + 1 puñado de almendras (15–20 unidades).</td>
+              <td>Ensalada completa: huevo duro, zanahoria, tomate, palta, garbanzos. (Sin atún para Eze; Nadia puede sumar atún al natural.)</td>
+            </tr>
+            <tr>
+              <td class="day">Jueves</td>
+              <td><strong>Eze:</strong> omelet de 2 huevos + 1 tostada integral + ½ palta.<br><strong>Nadia (laburo):</strong> yogur + granola sin azúcar + arándanos.</td>
+              <td>Pasta integral (60 g en seco) con salsa casera de tomate y carne picada magra. Ensalada de tomate al lado.</td>
+              <td>Yogur natural + frutillas o arándanos + 5 nueces.</td>
+              <td>Wok de vegetales (zapallito, zanahoria, cebolla, morrón, ajo) con tofu o pollo en cubos. <strong>Sin brócoli.</strong></td>
+            </tr>
+            <tr>
+              <td class="day">Viernes</td>
+              <td><strong>Eze:</strong> avena con leche descremada, banana, canela, 1 cda lino molido.<br><strong>Nadia (home office):</strong> "avena overnight" preparada el jueves a la noche (avena + yogur + chía + fruta en frasco).</td>
+              <td>Pollo al limón con ajo + ½ taza arroz integral + zanahoria y zapallitos al horno.</td>
+              <td>Tostada integral con queso untable light + tomate y orégano.</td>
+              <td>Hamburguesa casera de carne magra (sin pan o medio pan integral) + ensalada de hojas + tomate.</td>
+            </tr>
+            <tr class="weekend">
+              <td class="day">Sábado</td>
+              <td>Tostadas integrales con palta y huevo poché. Café. Día tranquilo, desayunan juntos en casa.</td>
+              <td>Comida regular: pollo o carne magra + verduras + carbo moderado.</td>
+              <td>Fruta + nueces, o mate cocido con tostada integral.</td>
+              <td><strong>Cena más libre</strong> — UNA opción: pizza casera con masa integral, hamburguesa con ensalada (no con papas), sushi sin frituras, empanadas al horno (4–5).</td>
+            </tr>
+            <tr class="weekend">
+              <td class="day">Domingo</td>
+              <td>Yogur natural + granola sin azúcar + fruta.</td>
+              <td><strong>ASADO FAMILIAR</strong> — versión balanceada: proteína magra (vacío, lomo, peceto, pollo) + ½ chorizo cada uno + ensalada de papa-huevo en porción moderada + ENSALADA VERDE GRANDE al lado (no es opcional).</td>
+              <td>Torta saludable casera (avena, banana, huevo, canela). Si hubo postre del asado, acá solo té.</td>
+              <td>Liviana: sopa de verduras + 1 huevo revuelto, o ensalada con huevo duro.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Notas sobre porciones</h3>
+      <ul>
+        <li>Eze suma a cada almuerzo y cena ~½ taza más de carbo (arroz, batata, papa) o 1 tostada integral más. Su gasto es mayor.</li>
+        <li>Nadia se queda con las porciones tal cual están en la tabla.</li>
+        <li>Si quedan con hambre real (no antojo) entre comidas: 1 fruta o 1 yogur natural. Nunca galletitas dulces.</li>
+      </ul>
+
+      <div class="callout callout-warm">
+        <h4>🔥 El asado del domingo (ritual no-negociable)</h4>
+        <p>El asado es la comida especial principal del fin de semana. No la cambiamos — es ritual familiar y sostenerlo es parte de hacer este plan a largo plazo. Lo que ajustamos:</p>
+        <ul>
+          <li>Proteína: priorizar cortes magros (vacío, lomo, peceto, asado de tira sin grasa visible, pollo). La parrilla mixta sigue.</li>
+          <li><strong>Chorizo: medio cada uno, no entero.</strong> Es de las cosas más calóricas.</li>
+          <li>Ensalada de papa-huevo: queda, porción moderada (la papa pesa). Que la papa sea ⅓ del bowl, sumar zanahoria, chauchas, cebolla.</li>
+          <li>Ensalada verde grande al lado. Se sirve primero y se llena el plato con eso.</li>
+          <li>Pan: 1 rebanada o medio mignon, no 4.</li>
+          <li>Bebida: agua o gaseosa zero. Si toman vino, 1 copa.</li>
+        </ul>
+        <p>El asado balanceado así <strong>no arruina la semana</strong>. Es una comida sociable, abundante en proteína magra y verdura, con un poco de carbo. Está bien.</p>
+      </div>
+
+      <h3>La cena del sábado (más libre)</h3>
+      <p>El sábado a la noche queda como segundo momento flexible, más liviano que el asado. UNA opción del listado de arriba. Lo que NO entra: pizza familiar + cerveza + helado en la misma noche.</p>
+      <p>En total el finde tiene 2 momentos flexibles bien dosificados (asado del domingo + cena del sábado). Ese es el límite.</p>
+
+      <h3>Receta torta saludable</h3>
+      <ul>
+        <li>3 bananas maduras pisadas + 2 huevos + 1 taza de avena + 1 cda canela + 1 cdita polvo de hornear + opcional: nueces picadas o chips de chocolate &gt;70%.</li>
+        <li>Mezclar todo, horno medio 25–30 min en molde aceitado. Sin azúcar, sin harina.</li>
+      </ul>
+    </section>
+
+    <section id="compras">
+      <h2>4. Lista de compras semanal</h2>
+      <p>Para los dos por una semana. Ajusten cantidades después de las primeras 2 semanas.</p>
+
+      <h3>Proteínas</h3>
+      <ul>
+        <li>Pollo: 2 kg (pechugas y patas)</li>
+        <li>Carne magra (peceto, cuadril, nalga): 1 kg</li>
+        <li>Carne picada magra: 500 g</li>
+        <li>Huevos: 2 docenas</li>
+        <li>Atún al natural: 3 latas (Nadia)</li>
+        <li>Queso port salut light: 200 g</li>
+        <li>Queso untable light: 1 pote</li>
+        <li>Tofu: 300 g (opcional, para wok)</li>
+        <li>Yogur natural firme sin azúcar: 1 kg</li>
+      </ul>
+
+      <h3>Verduras y frutas</h3>
+      <ul>
+        <li>Verduras: rúcula (2 atados), espinaca (1 atado), tomate (1 kg), zanahoria (1 kg), cebolla (1 kg), zapallitos (1 kg), calabaza (1 mediana), boniato (1 kg), papa (1 kg), ajo, palta (3), zapallo, morrones (3)</li>
+        <li>Frutas: manzana, banana, frutilla o arándanos, pera, kiwi (~3 kg total)</li>
+      </ul>
+
+      <h3>Almacén</h3>
+      <ul>
+        <li>Arroz integral, avena tradicional, fideos integrales, lentejas, garbanzos</li>
+        <li>Pan integral o lactal integral</li>
+        <li>Aceite de oliva extra virgen, salsa de tomate sin azúcar agregada</li>
+        <li>Semillas de chía, semillas de lino, nueces, almendras</li>
+        <li>Canela, orégano, pimentón, sal, pimienta</li>
+        <li>Café, té, yerba</li>
+      </ul>
+
+      <div class="callout">
+        <h4>🚫 Lo que NO entra a la casa</h4>
+        <ul>
+          <li>Gaseosas comunes (zero ok pero no es ideal)</li>
+          <li>Galletitas dulces, facturas</li>
+          <li>Jugos envasados</li>
+          <li>Pan blanco / lactal blanco</li>
+          <li>Helado de pote en el freezer</li>
+        </ul>
+        <p><strong>Regla simple:</strong> si no está en la cocina, no se come a las 11 de la noche. La fuerza de voluntad gana en el supermercado, no a las 23 h en pijama.</p>
+      </div>
+    </section>
+
+    <section id="empleada">
+      <h2>5. Cocina con la empleada (3 días → 7 días)</h2>
+      <p>La idea: que los 3 días que viene deje preparaciones grandes que cubran toda la semana ("batch cooking"). Es la diferencia entre cumplir el plan y caer en el delivery.</p>
+
+      <h3>Día 1 (lunes)</h3>
+      <ul>
+        <li>1,5 kg de pollo: mitad al horno con limón y ajo, mitad grillado en pechugas.</li>
+        <li>1 olla grande de lentejas guisadas con verduras (almuerzo martes, congelar 2 porciones).</li>
+        <li>Bowls de ensalada cortada en heladera: zanahoria rallada, tomate cubeteado, cebolla picada.</li>
+      </ul>
+
+      <h3>Día 2 (miércoles)</h3>
+      <ul>
+        <li>Tortilla grande de zapallitos al horno.</li>
+        <li>Carne magra: ½ kg fileteada (bife miércoles, hamburguesas viernes), ½ kg en salsa bolognesa magra.</li>
+        <li>Sopa de verduras grande para freezar en porciones (cena rápida sábado).</li>
+      </ul>
+
+      <h3>Día 3 (viernes)</h3>
+      <ul>
+        <li>Pollo al horno con verduras (cena domingo y reserva).</li>
+        <li>Puré de calabaza grande.</li>
+        <li>Salteado de vegetales pre-cortados para wok en bolsas de freezer.</li>
+        <li>Hamburguesas caseras formadas, separadas con papel en freezer (8 unidades).</li>
+      </ul>
+
+      <h3>Instrucciones para dejarle</h3>
+      <ul>
+        <li>Todo se cocina con aceite de oliva, no manteca.</li>
+        <li>Sin freír. Horno, plancha, hervido, vapor.</li>
+        <li>Etiquetar las porciones con fecha y nombre.</li>
+        <li>Las verduras crudas se lavan y cortan; van a la heladera en tuppers.</li>
+      </ul>
+    </section>
+
+    <section id="reglas">
+      <h2>6. Reglas para no abandonar</h2>
+
+      <h3>Delivery — cómo manejarlo</h3>
+      <p>2 momentos flexibles por semana, planificados, no improvisados.</p>
+      <ul>
+        <li><span class="pill pill-yes">Sí</span> parrilla con ensalada (no con papas), hamburguesa con ensalada, sushi sin tempura, empanadas al horno (4–5 unidades), pizza casera con masa integral.</li>
+        <li><span class="pill pill-no">No</span> pizza familiar + cerveza + helado en la misma noche. Eso es 3.000 kcal de una y arruina toda la semana.</li>
+      </ul>
+
+      <h3>Dulces</h3>
+      <ul>
+        <li>2 cuadraditos de chocolate &gt;70% por día: ok. (El chocolate amargo es bueno para el hígado.)</li>
+        <li>Postre del finde: ok dentro de la comida especial.</li>
+        <li>Helado: 1 vez cada 15 días, 1 bocha (no pote), de fruta o sabores simples.</li>
+      </ul>
+
+      <h3>Alcohol — especialmente Eze</h3>
+      <ul>
+        <li>Cerveza y vino dulce: cortar lo más posible los primeros 2 meses (es lo más castigado para el hígado graso).</li>
+        <li>Si toman: 1 copa de vino tinto seco con la comida especial del sábado o el asado del domingo, máximo 2.</li>
+        <li>Cero alcohol entre semana al menos los primeros 60 días.</li>
+      </ul>
+
+      <h3>Pesarse y medir</h3>
+      <ul>
+        <li>Sábado a la mañana, en ayunas, después del baño, mismo lugar y misma balanza. Solo 1 vez por semana.</li>
+        <li>Anotar en una nota del celular: peso + cómo estuvo la semana en una palabra.</li>
+        <li>Foto frontal y de perfil cada 30 días — al final del 3er mes la diferencia se ve mucho más en la foto que en la balanza.</li>
+      </ul>
+
+      <h3>Cuándo el plan está funcionando</h3>
+      <ul>
+        <li>Eze: 0,5 a 0,7 kg/semana en promedio (medido cada 4 semanas, no cada 1).</li>
+        <li>Nadia: 0,4 a 0,5 kg/semana.</li>
+        <li>Habrá semanas de meseta, semanas de bajar 1,5 kg, semanas de subir 0,5 kg. La balanza miente día a día. Se mira el promedio del mes.</li>
+      </ul>
+    </section>
+
+    <section id="ejercicio">
+      <h2>7. Plan de ejercicio</h2>
+      <p>Punto clave: para hígado graso, la caminata de 30–45 min a paso rápido es de las cosas más efectivas que existen. No hace falta correr — y mucho menos al inicio con 110 kg, donde correr castiga rodillas. La caminata es la base.</p>
+
+      <h3>Ezequiel — semana tipo</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Día</th><th>Tipo</th><th>Detalle</th></tr></thead>
+          <tbody>
+            <tr><td class="day">Lunes</td><td>Fuerza casa A</td><td>Tren superior + core, 45 min.</td></tr>
+            <tr><td class="day">Martes</td><td>Caminata + movilidad</td><td>30–40 min de caminata vigorosa. 5 min de movilidad antes de dormir.</td></tr>
+            <tr><td class="day">Miércoles</td><td>Caminata larga</td><td>60 min, ritmo bueno (5–6 km/h). Idealmente al aire libre.</td></tr>
+            <tr><td class="day">Jueves</td><td>Descanso activo</td><td>Off de entrenamiento. Movilidad 10 min antes de dormir.</td></tr>
+            <tr><td class="day">Viernes</td><td>Fuerza casa B</td><td>Tren inferior + core, 45 min.</td></tr>
+            <tr class="weekend"><td class="day">Sábado</td><td>Cardio largo</td><td>60–90 min al aire libre. Caminata vigorosa con 4–5 tramos de 30 s a paso muy rápido en subida.</td></tr>
+            <tr class="weekend"><td class="day">Domingo</td><td>Caminata con Nadia</td><td>60 min, ritmo charla. Es el día "juntos". <strong>NO se negocia.</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Rutina A — Tren superior + core (lunes, casa, 45 min)</h4>
+      <ul>
+        <li>Calentamiento 5 min: marcha en el lugar, círculos de hombros, sentadillas suaves.</li>
+        <li>Circuito × 3–4 vueltas, 1 min descanso entre vueltas:
+          <ul>
+            <li>12 flexiones (apoyado en rodillas si hace falta).</li>
+            <li>15 remos inclinados con mochila cargada de 5–8 kg (libros).</li>
+            <li>20 elevaciones laterales con botellas de 1,5 L de agua.</li>
+            <li>15 dips en silla.</li>
+            <li>30 segundos plancha frontal.</li>
+          </ul>
+        </li>
+        <li>Estiramiento 5 min al final.</li>
+      </ul>
+
+      <h4>Rutina B — Tren inferior + core (viernes, casa, 45 min)</h4>
+      <ul>
+        <li>Calentamiento 5 min.</li>
+        <li>Circuito × 4 vueltas, 1 min descanso:
+          <ul>
+            <li>20 sentadillas (sin peso al inicio, mochila cargada después de 4 semanas).</li>
+            <li>12 zancadas alternadas (6 por pierna).</li>
+            <li>15 puentes glúteos.</li>
+            <li>20 elevaciones de talón parado (en escalón si tienen).</li>
+            <li>30 segundos plancha lateral cada lado.</li>
+          </ul>
+        </li>
+        <li>Estiramiento 5 min.</li>
+      </ul>
+      <p><strong>Progresión:</strong> primeras 2 semanas, 3 vueltas. Pasada la semana 3, subir a 4. Pasada la semana 6, agregar peso (mochila cargada en sentadillas y zancadas).</p>
+
+      <h3>Nadia — semana tipo</h3>
+      <p><strong>Recordatorio:</strong> antes de arrancar la rutina de fuerza, mostrarle el plan al neurólogo o cardiólogo de control y pedir luz verde. Hasta tener ese OK: solo Zumba (que ya hace) y caminatas. Nada de pesas pesadas ni ejercicios donde se aguante la respiración con esfuerzo.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Día</th><th>Tipo</th><th>Detalle</th></tr></thead>
+          <tbody>
+            <tr><td class="day">Lunes</td><td>Zumba ✓</td><td>Ya lo hacés. Mantenerlo.</td></tr>
+            <tr><td class="day">Martes</td><td>Fuerza corta casa</td><td>20–25 min ANTES de empezar el día (8:00–8:25), aprovechando home office.</td></tr>
+            <tr><td class="day">Miércoles</td><td>Zumba ✓</td><td>Ya lo hacés. Mantenerlo.</td></tr>
+            <tr><td class="day">Jueves</td><td>Caminata corta</td><td>Volvés 18 h. Antes de psicóloga (20:15), 30 min de caminata. Si no se puede, descanso.</td></tr>
+            <tr><td class="day">Viernes</td><td>Fuerza corta casa</td><td>20–25 min en la mañana del home office. Misma rutina que martes.</td></tr>
+            <tr class="weekend"><td class="day">Sábado</td><td>Libre o caminata</td><td>Si queda energía, caminata con Eze. Si no, descanso.</td></tr>
+            <tr class="weekend"><td class="day">Domingo</td><td>Caminata con Eze</td><td>60 min juntos. <strong>NO se negocia.</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Rutina corta de fuerza para Nadia (20 min, casa)</h4>
+      <ul>
+        <li>Calentamiento 3 min: marcha en el lugar, círculos de cadera y brazos.</li>
+        <li>Circuito × 3 vueltas, 45 s descanso:
+          <ul>
+            <li>15 sentadillas.</li>
+            <li>12 puentes glúteos.</li>
+            <li>30 s plancha (apoyada en rodillas si hace falta).</li>
+            <li>12 zancadas alternadas.</li>
+            <li>15 abdominales bicicleta.</li>
+          </ul>
+        </li>
+        <li>Estiramiento 2 min.</li>
+      </ul>
+      <p><strong>Importante:</strong> la idea no es sumar más cosas a una agenda saturada. Las dos rutinas cortas + las dos zumbas son suficientes. El objetivo es no perder masa muscular mientras baja.</p>
+
+      <div class="callout callout-info">
+        <h4>👟 Caminatas en pareja (no-negociable)</h4>
+        <ul>
+          <li>1 caminata juntos los domingos, 60 min mínimo. Es el ancla del plan.</li>
+          <li>Si pueden meter una segunda durante la semana, bonus.</li>
+          <li>Ritmo "charla": pueden hablar pero no cantar. Si pueden cantar tranquilos, vayan más rápido.</li>
+          <li>Calzado con buena amortiguación. Importante con 110 kg.</li>
+        </ul>
+        <p><strong>Por qué es central:</strong> para hígado graso, 150 minutos por semana de caminata moderada bajan la grasa hepática incluso sin perder peso. Con peso bajando, el efecto se multiplica.</p>
+      </div>
+    </section>
+
+    <section id="hitos">
+      <h2>8. Hitos esperables y revisión</h2>
+      <h3>Etapas</h3>
+      <ul>
+        <li><strong>Mes 1 — el ajuste.</strong> Foco en armar hábitos. La balanza se mueve poco (2–3 kg). Es normal: el cuerpo se acomoda, sale agua. NO desmotivarse acá.</li>
+        <li><strong>Mes 2 y 3 — la pendiente.</strong> Si los hábitos están, la balanza cede más rápido. Eze: 4–6 kg en estos dos meses. Nadia: 3–5 kg.</li>
+        <li><strong>Mes 4 a 6 — la meseta.</strong> El cuerpo se acostumbra al nuevo gasto. Acá hay que ajustar: bajar 100–150 kcal, sumar 1 caminata más, cambiar la rutina.</li>
+        <li><strong>Mes 7 a 9 — el cierre (Eze).</strong> Eze llega a 90 kg. Empieza mantenimiento.</li>
+        <li><strong>Mes 10 a 11 — el cierre (Nadia).</strong> Nadia llega a 90 kg. Otro logro.</li>
+      </ul>
+
+      <h3>Revisión cada 30 días</h3>
+      <ul>
+        <li>Mini-evaluación: peso, fotos, cómo se siente la rutina, qué les costó, qué les salió fácil.</li>
+        <li>Si los números no avanzan: revisamos qué falla (lo más común son los snacks invisibles entre comidas, o el alcohol del finde duplicado).</li>
+        <li>Si avanzan más rápido de lo esperado: ojo con la pérdida de masa muscular. Hay que sumar proteína, no menos comida.</li>
+      </ul>
+    </section>
+
+    <section id="medico">
+      <h2>9. Cuándo consultar al médico</h2>
+      <ul>
+        <li>Antes de arrancar (idealmente): chequeo general — hepatograma, lipidograma, glucemia, presión, ECG si nunca se hizo. Especialmente Eze por el hígado graso.</li>
+        <li>Nadia: visita al neurólogo o cardiólogo de control para mostrar el plan de ejercicio y pedir OK. Por su antecedente de trombosis cerebral. Hasta tener ese OK: solo Zumba y caminatas.</li>
+        <li>Si aparece dolor articular persistente más allá de la agujeta normal de los primeros días: pausa y consulta.</li>
+        <li>Mareos, dolor de pecho, falta de aire desproporcionada: detener y consultar.</li>
+        <li>Para Nadia, señales de alarma específicas: dolor de cabeza fuerte e inusual, alteraciones de la visión, debilidad o adormecimiento en un lado del cuerpo, dificultad para hablar. Cualquiera: detener y atención médica.</li>
+        <li>Eze: control hepático a los 3 meses para ver evolución del hígado graso. Esa es la métrica más importante, más que la balanza.</li>
+      </ul>
+
+      <h3>Lo que NO es este plan</h3>
+      <ul>
+        <li>No es keto, ni paleo, ni ayuno intermitente. No hay dietas mágicas sostenibles.</li>
+        <li>No es para perder 20 kg en 2 meses. Eso, además de imposible, hace mal.</li>
+        <li>No reemplaza al médico, nutricionista ni entrenador presencial. Si pueden sumar nutricionista cada 2–3 meses, mejor.</li>
+      </ul>
+
+      <h3>Cómo seguimos</h3>
+      <p>A los 30 días vuelvan a contarme cómo fue: qué funcionó, qué no, peso, fotos. Ahí ajusto la versión 2 con lo que aprendimos.</p>
+      <p><strong>Lo más importante:</strong> están haciendo esto juntos. Esa decisión los pone arriba del 80% de la gente que intenta sola y abandona en 6 semanas. El plan es la herramienta — la pareja es el motor.</p>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  Plan integral — Eze & Nadia · Mayo 2026
+</footer>
+
+<script>
+  // Mobile TOC toggle
+  const btn = document.getElementById('tocBtn');
+  const toc = document.getElementById('toc');
+  btn.addEventListener('click', () => toc.classList.toggle('open'));
+  toc.addEventListener('click', e => {
+    if (e.target.tagName === 'A') toc.classList.remove('open');
+  });
+  // Close TOC when clicking outside on mobile
+  document.addEventListener('click', e => {
+    if (window.innerWidth <= 1023 && !toc.contains(e.target) && e.target !== btn) {
+      toc.classList.remove('open');
+    }
+  });
+</script>
+
+</body>
+</html>

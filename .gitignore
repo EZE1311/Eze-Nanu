@@ -1,0 +1,12 @@
+# Word lock files
+~$*.docx
+~$*.doc
+~$*.xlsx
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp
