@@ -1090,7 +1090,6 @@
         <div id="todayWeekBadge" style="text-align:right; font-size:0.78rem; opacity:0.92;">
           <div style="font-size:0.65rem; opacity:0.7; text-transform:uppercase; letter-spacing:0.06em;">Menú</div>
           <div style="font-weight:700;" id="todayWeekLabel">—</div>
-          <button id="todayWeekModeBtn" style="display:none; background:rgba(255,255,255,0.2); border:none; color:white; font-size:0.7rem; padding:3px 8px; border-radius:6px; margin-top:4px; cursor:pointer; font-family:inherit;">Volver a auto</button>
         </div>
       </div>
       <div id="todayMealsList" style="margin-top:14px;"></div>
@@ -2217,18 +2216,13 @@ function renderToday() {
   const dow = new Date().getDay();
   document.getElementById('todayName').textContent = DAY_NAMES_FULL[dow];
 
-  // Banner de semana
-  document.getElementById('todayWeekLabel').textContent = `Semana ${currentWeek + 1}`;
-  const modeBtn = document.getElementById('todayWeekModeBtn');
-  if (isWeekManual()) {
-    modeBtn.style.display = 'inline-block';
-    modeBtn.textContent = `Volver a auto (sem ${autoWeek() + 1})`;
-  } else {
-    modeBtn.style.display = 'none';
-  }
+  // Inicio SIEMPRE usa la semana auto (calendario).
+  // El selector manual de Comida no afecta esta vista.
+  const todayWeek = autoWeek();
+  document.getElementById('todayWeekLabel').textContent = `Semana ${todayWeek + 1}`;
 
-  // Comidas del día desde el menú real
-  const week = MENU_WEEKS[currentWeek];
+  // Comidas del día desde el menú real (semana del calendario)
+  const week = MENU_WEEKS[todayWeek];
   const today = week.find(d => d.id === dow);
   const list = document.getElementById('todayMealsList');
   if (!today) {
@@ -2252,13 +2246,12 @@ function renderToday() {
   document.getElementById('todayWorkout').textContent = ' ' + (DAY_WORKOUTS[dow] || '');
 }
 
-// botón "volver a auto"
+// botón "volver a auto" (en Comida)
 document.addEventListener('click', e => {
-  if (e.target && e.target.id === 'todayWeekModeBtn') {
+  if (e.target && e.target.id === 'backToAutoBtn') {
     setWeekAuto();
     renderWeekSelector();
     renderMenu();
-    renderToday();
   }
 });
 
@@ -2367,18 +2360,41 @@ document.getElementById('saveWeight').addEventListener('click', async () => {
 function renderWeekSelector() {
   const sel = document.getElementById('weekSelector');
   if (!sel) return;
-  sel.innerHTML = MENU_WEEKS.map((_, i) => `
-    <button class="week-btn ${i === currentWeek ? 'active' : ''}" data-week="${i}">
-      <span class="week-label">Semana</span>
-      ${i + 1}
-    </button>
-  `).join('');
+  const auto = autoWeek();
+  let html = MENU_WEEKS.map((_, i) => {
+    const isActive = i === currentWeek;
+    const isAuto = i === auto;
+    return `
+      <button class="week-btn ${isActive ? 'active' : ''}" data-week="${i}">
+        <span class="week-label">Semana ${isAuto ? '· hoy' : ''}</span>
+        ${i + 1}
+      </button>
+    `;
+  }).join('');
+  sel.innerHTML = html;
+
+  // Aviso "estás viendo manual" + botón volver a auto, debajo
+  const noteId = 'weekModeNote';
+  let note = document.getElementById(noteId);
+  if (!note) {
+    note = document.createElement('div');
+    note.id = noteId;
+    note.style.cssText = 'display:flex; align-items:center; gap:8px; font-size:0.78rem; color:var(--slate-500); margin-bottom:10px; padding:8px 12px; background:var(--blue-soft); border-radius:8px;';
+    sel.parentNode.insertBefore(note, sel.nextSibling);
+  }
+  if (isWeekManual()) {
+    note.style.display = 'flex';
+    note.innerHTML = `<span style="flex:1">Estás viendo Semana ${currentWeek + 1} fija. La semana de hoy según calendario es la ${auto + 1}.</span>
+      <button id="backToAutoBtn" style="background:var(--blue); color:white; border:none; padding:6px 10px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer; font-family:inherit; flex-shrink:0;">Volver a auto</button>`;
+  } else {
+    note.style.display = 'none';
+  }
+
   sel.querySelectorAll('.week-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       setWeekManual(parseInt(btn.dataset.week, 10));
       renderWeekSelector();
       renderMenu();
-      renderToday();
     });
   });
 }
@@ -2514,6 +2530,9 @@ function activateTab(name) {
   document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.dataset.pane === name));
   history.replaceState(null, '', '#/' + name);
   window.scrollTo({ top: 0, behavior: 'instant' });
+  // Inicio siempre se rerenderiza con la semana del calendario al activarse
+  // (evita que se quede desactualizado si pasó la medianoche del domingo)
+  if (name === 'inicio' && typeof renderToday === 'function') renderToday();
 }
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => activateTab(t.dataset.tab));
