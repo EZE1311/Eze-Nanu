@@ -776,8 +776,9 @@
     color: white;
     box-shadow: 0 4px 10px -4px rgba(16,185,129,0.5);
   }
-  .sub-content { display: none; }
-  .sub-content.active { display: block; animation: fadeIn 0.2s ease-out; }
+  /* sub-content visibility is controlled by inline style="display:..." set by JS;
+     don't override with CSS or first sub-pane stays hidden until user clicks. */
+  .sub-content.active { animation: fadeIn 0.2s ease-out; }
 
   /* ==================== DAY CARD (meal plan) ==================== */
   .day-card {
