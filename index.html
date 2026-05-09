@@ -634,6 +634,7 @@
     grid-template-columns: 1fr 1fr auto;
     gap: 8px;
     margin: 8px 0 12px;
+    min-width: 0; /* allow inputs to shrink instead of overflowing */
   }
   .input-row input {
     padding: 11px 13px;
@@ -644,6 +645,8 @@
     background: var(--ink-50);
     color: var(--ink-900);
     transition: all 0.15s;
+    min-width: 0;
+    width: 100%;
   }
   .input-row input:focus {
     outline: none;
@@ -652,6 +655,16 @@
     box-shadow: 0 0 0 4px var(--green-soft);
   }
   .input-row input::placeholder { color: var(--ink-400); font-weight: 500; }
+  /* Stack on narrow screens: inputs side by side, Guardar full-width below */
+  @media (max-width: 480px) {
+    .input-row {
+      grid-template-columns: 1fr 1fr;
+    }
+    .input-row .btn-save {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+  }
   .btn-save {
     flex: 0 0 auto;
     background: var(--grad-mint);
@@ -1442,24 +1455,6 @@
       <!-- inyectado por JS -->
     </div>
 
-    <div class="card tracker">
-      <div class="card-header">
-        <div class="card-title">⚖️ Pesarse semanal</div>
-        <span class="card-meta">viernes en ayunas</span>
-      </div>
-      <div class="input-row">
-        <input id="weightEze" type="number" step="0.1" placeholder="Eze (kg)" inputmode="decimal">
-        <input id="weightNadia" type="number" step="0.1" placeholder="Nadia (kg)" inputmode="decimal">
-        <button class="btn-save" id="saveWeight">Guardar</button>
-      </div>
-      <div class="history" id="history">
-        <div class="history-row head">
-          <div>Fecha</div><div>Eze</div><div>Nadia</div>
-        </div>
-        <!-- inyectado por JS -->
-      </div>
-    </div>
-
     <div class="callout green">
       <div class="callout-title">🎯 Objetivos</div>
       <p style="margin: 0;"><strong>Eze:</strong> 110 → 90 kg en 7-9 meses · <strong>Nadia:</strong> 110 → 90 kg en 9-11 meses</p>
@@ -1798,6 +1793,24 @@
 
   <!-- ============== OBJETIVOS ============== -->
   <section class="pane" data-pane="objetivos">
+    <div class="card tracker">
+      <div class="card-header">
+        <div class="card-title">⚖️ Pesarse semanal</div>
+        <span class="card-meta">viernes en ayunas</span>
+      </div>
+      <div class="input-row">
+        <input id="weightEze" type="number" step="0.1" placeholder="Eze (kg)" inputmode="decimal">
+        <input id="weightNadia" type="number" step="0.1" placeholder="Nadia (kg)" inputmode="decimal">
+        <button class="btn-save" id="saveWeight">Guardar</button>
+      </div>
+      <div class="history" id="history">
+        <div class="history-row head">
+          <div>Fecha</div><div>Eze</div><div>Nadia</div>
+        </div>
+        <!-- inyectado por JS -->
+      </div>
+    </div>
+
     <h2>Progreso al objetivo</h2>
     <div id="goalCards"><!-- inyectado --></div>
 
