@@ -1186,44 +1186,98 @@
     box-shadow: 0 6px 14px -6px rgba(16,185,129,0.5);
   }
   .week-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     margin: 10px 0;
   }
-  .week-day {
-    aspect-ratio: 1;
+  .week-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
     background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--ink-100);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s;
+  }
+  .week-row:hover { transform: translateX(2px); box-shadow: var(--shadow); }
+  .week-row.weekend {
+    background: linear-gradient(135deg, #FFF7ED 0%, #FFFBEB 100%);
+    border-color: rgba(249,115,22,0.18);
+  }
+  .week-row.zumba {
+    background: linear-gradient(135deg, var(--rose-soft) 0%, #FDF2F8 100%);
+    border-color: rgba(236,72,153,0.2);
+  }
+  .week-row.rest {
+    background: var(--ink-50);
+    border-style: dashed;
+    opacity: 0.85;
+  }
+  .week-day {
+    flex: 0 0 52px;
+    background: var(--ink-50);
     border-radius: 10px;
+    padding: 6px 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.78rem;
     font-weight: 700;
-    color: var(--ink-500);
+    color: var(--ink-700);
     border: 1px solid var(--ink-100);
+    text-transform: capitalize;
+    min-height: 36px;
   }
-  .week-day.active { background: var(--grad-mint); color: white; border-color: transparent; }
-  .week-day.weekend { background: var(--orange-soft); color: #C2410C; }
-  .week-content { display: none; }
-  .week-content.active { display: block; animation: fadeIn 0.2s ease-out; }
-  .week-row { display: flex; gap: 8px; align-items: center; padding: 6px 0; }
+  .week-row.weekend .week-day { background: var(--orange-soft); color: #C2410C; border-color: transparent; }
+  .week-row.zumba .week-day { background: var(--rose-soft); color: #BE185D; border-color: transparent; }
+  .week-content {
+    flex: 1;
+    font-size: 0.88rem;
+    color: var(--ink-700);
+    line-height: 1.5;
+  }
+  .week-content strong {
+    display: block;
+    color: var(--ink-900);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+    letter-spacing: -0.01em;
+  }
   .week-label { font-weight: 700; color: var(--ink-500); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; min-width: 90px; }
 
-  /* ==================== DEMO BUTTON ==================== */
+  /* ==================== DEMO BUTTON (YouTube ▶) ==================== */
   .demo-btn {
-    background: var(--ink-50);
-    border: 1px solid var(--ink-200);
-    color: var(--ink-700);
-    padding: 7px 12px;
-    border-radius: 10px;
-    font-size: 0.78rem;
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #FEE2E2;
+    color: #DC2626;
+    border: 1px solid rgba(220,38,38,0.18);
+    border-radius: 9px;
     cursor: pointer;
-    font-family: inherit;
-    transition: all 0.15s;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: all 0.18s ease;
+    box-shadow: 0 2px 4px -1px rgba(220,38,38,0.1);
   }
-  .demo-btn:hover { background: var(--ink-100); }
+  .demo-btn svg {
+    width: 14px;
+    height: 14px;
+    margin-left: 2px; /* visual centering of triangle */
+  }
+  .demo-btn:hover {
+    background: #DC2626;
+    color: white;
+    transform: scale(1.06);
+    box-shadow: 0 6px 12px -4px rgba(220,38,38,0.45);
+  }
+  .demo-btn:active { transform: scale(0.96); }
 
   /* ==================== UTILITY ==================== */
   code {
